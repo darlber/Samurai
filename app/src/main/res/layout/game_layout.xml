@@ -1,0 +1,26 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@drawable/background"
+    android:layout_height="match_parent">
+
+    <!-- ImageView para la animación del samurái -->
+    <ImageView
+        android:id="@+id/samuraiAnimation"
+        android:layout_width="wrap_content"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <!-- Botón de pausa (opcional) -->
+    <ImageView
+        android:id="@+id/pauseButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@android:drawable/ic_media_pause"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:contentDescription="Botón de pausa" />
+</RelativeLayout>
