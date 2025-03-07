@@ -1,5 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:background="@drawable/background"
     android:layout_height="match_parent">
@@ -8,46 +9,56 @@
     <ImageView
         android:id="@+id/samuraiAnimation"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"
         android:scaleX="1.5"
         android:scaleY="1.5"
-        android:layout_height="wrap_content"
         android:visibility="gone" />
 
 
     <!-- Botón de pausa (opcional) -->
     <ImageView
         android:id="@+id/pauseButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_media_pause"
+        android:layout_width="46dp"
+        android:layout_height="42dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_margin="16dp"
-        android:contentDescription="Botón de pausa" />
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:contentDescription="Botón de pausa"
+        android:src="@android:drawable/ic_media_pause" />
 
-    <!-- Botón Izquierda -->
-    <Button
+    <ImageButton
         android:id="@+id/btnLeft"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Izquierda"
-        android:layout_alignParentBottom="true"
+        android:layout_width="84dp"
+        android:layout_height="62dp"
         android:layout_alignParentStart="true"
-        android:layout_margin="16dp"
-/>
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="10dp"
+        android:alpha="0.7"
+        android:scaleType="center"
+        android:src="@drawable/baseline_arrow_left_24"
+        android:text="Izquierda" />
 
-    <!-- Botón Derecha -->
-    <Button
+    <ImageButton
         android:id="@+id/btnRight"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Derecha"
+        android:layout_width="84dp"
+        android:layout_height="62dp"
         android:layout_toEndOf="@id/btnLeft"
-    android:layout_alignParentBottom="true"
-    android:layout_margin="16dp"
-    />
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginBottom="10dp"
+        android:alpha="0.7"
+        android:scaleType="center"
 
-    <!-- Botón Atacar (a la derecha de la pantalla) -->
+        android:src="@drawable/baseline_arrow_right_24"
+        android:text="Derecha" />
     <Button
         android:id="@+id/btnAttack"
         android:layout_width="wrap_content"

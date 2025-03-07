@@ -3,11 +3,14 @@ package com.example.samurai;
 import android.annotation.SuppressLint;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -20,6 +23,7 @@ public class GameFragment extends Fragment {
     private boolean isRunning = true;
     private boolean movingLeft = false;
     private boolean movingRight = false;
+    private boolean isAttacking = false;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -39,9 +43,38 @@ public class GameFragment extends Fragment {
         samuraiAnimation.setX(samurai.getX()); // Posición X centrada
         samuraiAnimation.setY(samurai.getY()); // Posición Y en la parte inferior
 
-        Button btnLeft = rootView.findViewById(R.id.btnLeft);
-        Button btnRight = rootView.findViewById(R.id.btnRight);
+        ImageButton btnLeft = rootView.findViewById(R.id.btnLeft);
+        ImageButton btnRight = rootView.findViewById(R.id.btnRight);
+        Button btnAttack = rootView.findViewById(R.id.btnAttack);
 
+        btnAttack.setOnClickListener(v -> {
+            if (!isAttacking) { // Solo ejecutar si no hay una animación de ataque en progreso
+                isAttacking = true; // Marcar que la animación de ataque está en progreso
+
+                // Cambiar la animación del samurái a "ataque"
+                setSamuraiAnimation(samurai.getAttackAnimation());
+
+                // Calcular la duración total de la animación de ataque
+                int totalDuration = 0;
+                AnimationDrawable attackAnimation = samurai.getAttackAnimation();
+                for (int i = 0; i < attackAnimation.getNumberOfFrames(); i++) {
+                    totalDuration += attackAnimation.getDuration(i);
+                }
+
+                // Usar un Handler para volver a la animación correcta después de que termine el ataque
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (movingLeft || movingRight) {
+                        // Si el samurái está en movimiento, volver a la animación de correr
+                        setSamuraiAnimation(samurai.getRunAnimation());
+
+                    } else {
+                        // Si no está en movimiento, volver a la animación idle
+                        setSamuraiAnimation(samurai.getIdleAnimation());
+                    }
+                    isAttacking = false; // Marcar que la animación de ataque ha terminado
+                }, totalDuration);
+            }
+        });
         btnLeft.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
