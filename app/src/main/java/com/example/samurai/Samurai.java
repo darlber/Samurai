@@ -8,14 +8,19 @@ import android.util.Log;
 import androidx.core.content.res.ResourcesCompat;
 
 public class Samurai {
-    private AnimationDrawable idleAnimation; // Cambia Bitmap por AnimationDrawable
+    private AnimationDrawable idleAnimation;
+    private AnimationDrawable runAnimation;
     private int x, y; // Posición del samurái
     private int width, height; // Tamaño del samurái
 
     public Samurai(Context context, int screenWidth, int screenHeight) {
         // Cargar la animación desde el archivo XML
         idleAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.idle_anim, null);
+        runAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.run_anim, null);
         if (idleAnimation == null) {
+            throw new RuntimeException("No se pudo cargar la animación del samurái.");
+        }
+        if (runAnimation == null) {
             throw new RuntimeException("No se pudo cargar la animación del samurái.");
         }
 
@@ -33,6 +38,14 @@ public class Samurai {
 
     public AnimationDrawable getIdleAnimation() {
         return idleAnimation;
+    }
+
+    public AnimationDrawable getRunAnimation() {
+        return runAnimation;
+    }
+
+    public void setRunAnimation(AnimationDrawable runAnimation) {
+        this.runAnimation = runAnimation;
     }
 
     public int getX() {

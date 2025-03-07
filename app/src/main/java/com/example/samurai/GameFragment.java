@@ -1,10 +1,13 @@
 package com.example.samurai;
 
+import android.annotation.SuppressLint;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -12,17 +15,17 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 public class GameFragment extends Fragment {
-
+    private Samurai samurai;
     private ImageView samuraiAnimation;
     private boolean isRunning = true;
+    private boolean movingLeft = false;
+    private boolean movingRight = false;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.game_layout, container, false);
-
-
-
         samuraiAnimation = rootView.findViewById(R.id.samuraiAnimation);
 
         // Obtener dimensiones de la pantalla
@@ -30,16 +33,51 @@ public class GameFragment extends Fragment {
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
         // Crear el objeto Samurai con las dimensiones de la pantalla
-        Samurai samurai = new Samurai(getContext(), screenWidth, screenHeight);
+        samurai = new Samurai(requireContext(), screenWidth, screenHeight);
 
         // Configurar la posición inicial del samurái en la mitad inferior de la pantalla
-        //
         samuraiAnimation.setX(samurai.getX()); // Posición X centrada
         samuraiAnimation.setY(samurai.getY()); // Posición Y en la parte inferior
 
+        Button btnLeft = rootView.findViewById(R.id.btnLeft);
+        Button btnRight = rootView.findViewById(R.id.btnRight);
+
+        btnLeft.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    movingLeft = true;
+                    samuraiAnimation.setScaleX(-1.5f); // Voltear a la izquierda
+                    setSamuraiAnimation(samurai.getRunAnimation()); // Cambiar a animación de caminar
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    movingLeft = false;
+                    setSamuraiAnimation(samurai.getIdleAnimation()); // Cambiar a animación idle
+                    v.performClick();
+                    break;
+            }
+            return true;
+        });
+
+        btnRight.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    movingRight = true;
+                    samuraiAnimation.setScaleX(1.5f); // Voltear a la derecha
+                    setSamuraiAnimation(samurai.getRunAnimation()); // Cambiar a animación de caminar
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    movingRight = false;
+                    setSamuraiAnimation(samurai.getIdleAnimation()); // Cambiar a animación idle
+                    v.performClick();
+                    break;
+            }
+            return true;
+        });
+
         startSamuraiAnimation();
         moveSamurai();
-
         return rootView;
     }
 
@@ -53,19 +91,31 @@ public class GameFragment extends Fragment {
         animation.start();
     }
 
-    //TODO: Hacer que el samurái se mueva izq y voltear, gravity
+    private void setSamuraiAnimation(AnimationDrawable animation) {
+        samuraiAnimation.setBackground(animation);
+        animation.stop();
+        animation.start();
+    }
+
     private void moveSamurai() {
         new Thread(() -> {
             while (isRunning) {
                 samuraiAnimation.post(() -> {
-                    samuraiAnimation.setX(samuraiAnimation.getX() + 5);
-                    if (samuraiAnimation.getX() > getResources().getDisplayMetrics().widthPixels) {
-                        samuraiAnimation.setX(-samuraiAnimation.getWidth());
+                    if (movingLeft) {
+                        samuraiAnimation.setX(samuraiAnimation.getX() - 5);
+                        if (samuraiAnimation.getX() + samuraiAnimation.getWidth() < 0) {
+                            samuraiAnimation.setX(getResources().getDisplayMetrics().widthPixels);
+                        }
+                    } else if (movingRight) {
+                        samuraiAnimation.setX(samuraiAnimation.getX() + 5);
+                        if (samuraiAnimation.getX() > getResources().getDisplayMetrics().widthPixels) {
+                            samuraiAnimation.setX(-samuraiAnimation.getWidth());
+                        }
                     }
                 });
 
                 try {
-                    Thread.sleep(16);
+                    Thread.sleep(16); // ~60 FPS
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
