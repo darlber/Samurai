@@ -141,14 +141,6 @@ public class GameFragment extends Fragment {
         spawnEnemies();
         return rootView;
     }
-    private void onAttack() {
-        for (int i = 0; i < enemies.size(); i++) {
-            Enemy enemy = enemies.get(i);
-            if (enemy.checkCollision((int) samuraiAnimation.getX(), (int) samuraiAnimation.getY(), samurai.getWidth(), samurai.getHeight())) {
-                enemy.takeDamage();
-            }
-        }
-    }
 
     private void startSamuraiAnimation() {
         // Cargar la animación desde el archivo XML
@@ -208,15 +200,18 @@ public class GameFragment extends Fragment {
                     switch (enemyType) {
                         case 1:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.flying_eye_run,
-                                    R.drawable.flying_eye_attack, R.drawable.flying_eye_hit, R.drawable.flying_eye_death, 8, 10, 4, spawnFromLeft);
+                                    R.drawable.flying_eye_attack, R.drawable.flying_eye_hit, R.drawable.flying_eye_death,
+                                    8, 8,  10, 4, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
                             break;
                         case 2:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.mushroom_run,
-                                    R.drawable.mushroom_attack, R.drawable.mushroom_hit, R.drawable.mushroom_death, 8, 4, 1, spawnFromLeft);
+                                    R.drawable.mushroom_attack, R.drawable.mushroom_hit, R.drawable.mushroom_death,
+                                    8, 8,  4, 1, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
                             break;
                         default:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.goblin_run,
-                                    R.drawable.goblin_attack, R.drawable.goblin_hit, R.drawable.goblin_death, 8, 10, 2, spawnFromLeft);
+                                    R.drawable.goblin_attack, R.drawable.goblin_hit, R.drawable.goblin_death,
+                                    8, 8,  10, 2, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
                             break;
                     }
 
@@ -226,7 +221,7 @@ public class GameFragment extends Fragment {
                     enemyHandler.postDelayed(this, random.nextInt(2000) + 1000); // Generar enemigos cada 1-3 segundos
                 }
             }
-        }, 3000); // Comenzar a generar enemigos después de 1 segundo
+        }, 1000); // Comenzar a generar enemigos después de 1 segundo
     }
 
     @Override
@@ -254,6 +249,14 @@ public class GameFragment extends Fragment {
             // Dibujar todos los enemigos
             for (int i = 0; i < enemies.size(); i++) {
                 Enemy enemy = enemies.get(i);
+
+                // No actualizar ni dibujar enemigos marcados para eliminación
+                if (enemy.isMarkedForRemoval()) {
+                    enemies.remove(i);
+                    i--; // Ajustar el índice después de eliminar un enemigo
+                    continue;
+                }
+
                 enemy.update(samuraiX, samurai.getWidth()); // Actualizar la posición del enemigo
                 enemy.draw(canvas); // Dibujar el enemigo
 

@@ -53,9 +53,18 @@ public class SpriteSheetAnimation {
     public int getFrameHeight() {
         return frameHeight;
     }
-
+    public int getFrameCount() {
+        return frameCount;
+    }
     public long getTotalDuration() {
         return frameCount * frameTime; // Duración total en milisegundos
+    }
+    public int getCurrentFrame() {
+        return currentFrame;
+    }
+    public void reset() {
+        currentFrame = 0; // Reiniciar al primer frame
+        lastFrameTime = System.currentTimeMillis(); // Reiniciar el tiempo del último frame
     }
 
 }
