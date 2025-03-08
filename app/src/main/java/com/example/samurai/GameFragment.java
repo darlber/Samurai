@@ -1,6 +1,8 @@
 package com.example.samurai;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -17,7 +19,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.samurai.enemigos.Enemy;
 import com.example.samurai.jugador.Samurai;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class GameFragment extends Fragment {
     private Samurai samurai;
@@ -26,6 +33,10 @@ public class GameFragment extends Fragment {
     private boolean movingLeft = false;
     private boolean movingRight = false;
     private boolean isAttacking = false;
+
+    private List<Enemy> enemies = new ArrayList<>();
+    private Handler enemyHandler = new Handler();
+    private Random random = new Random();
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -45,6 +56,7 @@ public class GameFragment extends Fragment {
         samuraiAnimation.setX(samurai.getX()); // Posición X centrada
         samuraiAnimation.setY(samurai.getY()); // Posición Y en la parte inferior
 
+        // Configurar botones
         ImageButton btnLeft = rootView.findViewById(R.id.btnLeft);
         ImageButton btnRight = rootView.findViewById(R.id.btnRight);
         Button btnAttack = rootView.findViewById(R.id.btnAttack);
@@ -68,7 +80,6 @@ public class GameFragment extends Fragment {
                     if (movingLeft || movingRight) {
                         // Si el samurái está en movimiento, volver a la animación de correr
                         setSamuraiAnimation(samurai.getRunAnimation());
-
                     } else {
                         // Si no está en movimiento, volver a la animación idle
                         setSamuraiAnimation(samurai.getIdleAnimation());
@@ -77,6 +88,7 @@ public class GameFragment extends Fragment {
                 }, totalDuration);
             }
         });
+
         btnLeft.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
@@ -111,8 +123,17 @@ public class GameFragment extends Fragment {
             return true;
         });
 
+        // Iniciar animación y movimiento del samurái
         startSamuraiAnimation();
         moveSamurai();
+
+        // Crear y agregar CustomView para dibujar enemigos
+        CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight);
+        ((ViewGroup) rootView).addView(customView);
+
+        // Generar enemigos
+        spawnEnemies();
+
         return rootView;
     }
 
@@ -158,9 +179,76 @@ public class GameFragment extends Fragment {
         }).start();
     }
 
+    private void spawnEnemies() {
+        enemyHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (isRunning) {
+                    int screenWidth = getResources().getDisplayMetrics().widthPixels;
+                    int screenHeight = getResources().getDisplayMetrics().heightPixels;
+
+                    // Crear diferentes tipos de enemigos
+                    int enemyType = random.nextInt(4); // Aleatorio entre 0 y 2
+                    boolean spawnFromLeft = random.nextBoolean(); // Aparecer por la izquierda o derecha
+
+                    Enemy enemy;
+                    switch (enemyType) {
+                        case 1:
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.flying_eye_run,R.drawable.flying_eye_attack, 8, 10, 4, spawnFromLeft);
+                            break;
+                        case 3:
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.mushroom_run,R.drawable.mushroom_attack, 8, 4, 1, spawnFromLeft);
+                            break;
+                        default:
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.goblin_run,R.drawable.goblin_attack, 8, 10, 2, spawnFromLeft);
+                    }
+
+                    enemies.add(enemy);
+
+                    // Repetir la generación de enemigos
+                    enemyHandler.postDelayed(this, random.nextInt(2000) + 1000); // Generar enemigos cada 1-3 segundos
+                }
+            }
+        }, 1000); // Comenzar a generar enemigos después de 1 segundo
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         isRunning = false; // Detener el hilo cuando el Fragment se destruya
+    }
+
+    private class CustomView extends View {
+        private int screenWidth, screenHeight;
+
+        public CustomView(Context context, int screenWidth, int screenHeight) {
+            super(context);
+            this.screenWidth = screenWidth;
+            this.screenHeight = screenHeight;
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            // Obtener la posición del samurái
+            int samuraiX = (int) samuraiAnimation.getX();
+
+            // Dibujar todos los enemigos
+            for (int i = 0; i < enemies.size(); i++) {
+                Enemy enemy = enemies.get(i);
+                enemy.update(samuraiX, samurai.getWidth()); // Actualizar la posición del enemigo
+                enemy.draw(canvas); // Dibujar el enemigo
+
+                // Eliminar enemigos que salen de la pantalla
+                if (enemy.getX() + enemy.getWidth() < 0 || enemy.getX() > screenWidth) {
+                    enemies.remove(i);
+                    i--; // Ajustar el índice después de eliminar un enemigo
+                }
+            }
+
+            // Volver a dibujar la vista
+            invalidate();
+        }
     }
 }

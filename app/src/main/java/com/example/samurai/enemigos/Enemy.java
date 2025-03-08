@@ -1,69 +1,88 @@
 package com.example.samurai.enemigos;
 
 import android.content.Context;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 
-import androidx.core.content.res.ResourcesCompat;
+import com.example.samurai.SpriteSheetAnimation;
 
 public class Enemy {
-    private AnimationDrawable idleAnimation;
-    private AnimationDrawable runAnimation;
-    private AnimationDrawable attackAnimation;
-    private int x, y; // Posición del enemigo
-    private int width, height; // Tamaño del enemigo
+    private SpriteSheetAnimation runAnimation, attackAnimation;
+    private SpriteSheetAnimation currentAnimation; // Animación activa
+    private int x, y;
+    private int width, height;
+    private int speed;
+    private boolean isFlipped;
+    private boolean isAttacking = false;
 
-    public Enemy(Context context, int screenWidth, int screenHeight) {
-        // Cargar la animación desde el archivo XML
-        idleAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.enemy_idle_anim, null);
-        runAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.enemy_run_anim, null);
-        attackAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.enemy_attack_anim, null); // Cargar animación de ataque
-        if (idleAnimation == null || runAnimation == null || attackAnimation == null) {
-            throw new RuntimeException("No se pudo cargar la animación del enemigo.");
+    private int attackRange = 100; // Distancia para atacar
+
+    public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet, int frameCount, int fps, int speed, boolean spawnFromLeft) {
+        Bitmap runSheet = BitmapFactory.decodeResource(context.getResources(), runSpriteSheet);
+        Bitmap attackSheet = BitmapFactory.decodeResource(context.getResources(), attackSpriteSheet);
+
+        runAnimation = new SpriteSheetAnimation(runSheet, frameCount, fps);
+        attackAnimation = new SpriteSheetAnimation(attackSheet, frameCount, fps);
+
+        currentAnimation = runAnimation; // Comienza con la animación de correr
+
+        width = runAnimation.getFrameWidth();
+        height = runAnimation.getFrameHeight();
+
+        if (spawnFromLeft) {
+            x = -width;
+        } else {
+            x = screenWidth;
+        }
+        y = screenHeight - height+50;
+
+        this.speed = speed;
+        this.isFlipped = !spawnFromLeft;
+    }
+
+    public void update(int samuraiX, int samuraiWidth) {
+        currentAnimation.update();
+
+        // Calcular distancia entre los centros del enemigo y el samurái
+        int enemyCenterX = x + (width / 2);
+        int samuraiCenterX = samuraiX + (samuraiWidth / 2);
+        int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
+
+        if (distanceToSamurai > attackRange) {
+            // PERSEGUIR
+            isAttacking = false;
+            currentAnimation = runAnimation;
+
+            if (enemyCenterX < samuraiCenterX) {
+                x += speed;
+                isFlipped = false;
+            } else {
+                x -= speed;
+                isFlipped = true;
+            }
+        } else {
+            // ATACAR
+            isAttacking = true;
+            currentAnimation = attackAnimation;
+        }
+    }
+
+    public void draw(Canvas canvas) {
+        Matrix matrix = new Matrix();
+        if (isFlipped) {
+            matrix.preScale(-1, 1);
+            matrix.postTranslate(x + width, y);
+        } else {
+            matrix.postTranslate(x, y);
         }
 
-        // Obtener el tamaño del primer frame de la animación
-        Drawable firstFrame = idleAnimation.getFrame(0);
-        width = firstFrame.getIntrinsicWidth();
-        height = firstFrame.getIntrinsicHeight();
-
-        // Posicionar al enemigo en la pantalla
-        x = screenWidth; // Comienza en el borde derecho de la pantalla
-        y = screenHeight - height - 100; // 100 píxeles desde la parte inferior
-
-        Log.d("Enemy", "Animación cargada correctamente: " + width + "x" + height);
+        currentAnimation.draw(canvas, matrix);
     }
 
-    public AnimationDrawable getIdleAnimation() {
-        return idleAnimation;
-    }
-
-    public AnimationDrawable getRunAnimation() {
-        return runAnimation;
-    }
-
-    public AnimationDrawable getAttackAnimation() {
-        return attackAnimation;
-    }
-
-    public int getX() {
-        return x;
-    }
-
-    public int getY() {
-        return y;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
-
-    public void move() {
-        x -= 5; // Mover el enemigo hacia la izquierda
-    }
+    public int getX() { return x; }
+    public int getY() { return y; }
+    public int getWidth() { return width; }
+    public int getHeight() { return height; }
 }
