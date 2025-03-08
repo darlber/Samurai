@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,12 +39,19 @@ public class GameFragment extends Fragment {
     private Handler enemyHandler = new Handler();
     private Random random = new Random();
 
+
+    private int score = 0; // Contador de puntos
+    private TextView scoreTextView; // TextView para mostrar los puntos
+
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.game_layout, container, false);
         samuraiAnimation = rootView.findViewById(R.id.samuraiAnimation);
+
+        // Obtener el TextView para mostrar los puntos
+        scoreTextView = rootView.findViewById(R.id.scoreTextView);
 
         // Obtener dimensiones de la pantalla
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -62,38 +70,58 @@ public class GameFragment extends Fragment {
         Button btnAttack = rootView.findViewById(R.id.btnAttack);
 
         btnAttack.setOnClickListener(v -> {
-            if (!isAttacking) { // Solo ejecutar si no hay una animación de ataque en progreso
-                isAttacking = true; // Marcar que la animación de ataque está en progreso
+            if (!isAttacking) {
+                isAttacking = true;
 
                 // Cambiar la animación del samurái a "ataque"
                 setSamuraiAnimation(samurai.getAttackAnimation());
 
-                // Verificar colisión con enemigos y restarles vida
+                // Determinar la dirección del ataque
+                boolean facingRight = samuraiAnimation.getScaleX() > 0;
+
+                // Ajustar el hitbox del ataque
+                int attackWidth = samurai.getWidth() / 3; // 🔥 Misma distancia en ambas direcciones
+                int attackX = facingRight
+                        ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2  // Derecha
+                        : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth; // Izquierda
+
+                int attackY = (int) samuraiAnimation.getY();
+                int attackHeight = samurai.getHeight();
+
+                // Verificar colisión con enemigos en la dirección correcta
                 for (int i = 0; i < enemies.size(); i++) {
                     Enemy enemy = enemies.get(i);
-                    if (enemy.checkCollision((int) samuraiAnimation.getX(), (int) samuraiAnimation.getY(), samurai.getWidth(), samurai.getHeight())) {
-                        enemy.takeDamage(); // Quitar 1 punto de vida al enemigo
+
+                    // 🔥 Filtrar enemigos en la dirección correcta
+                    if ((facingRight && enemy.getX() > samuraiAnimation.getX()) ||
+                            (!facingRight && enemy.getX() < samuraiAnimation.getX())) {
+
+                        if (enemy.checkCollision(attackX, attackY, attackWidth, attackHeight)) {
+                            enemy.takeDamage();
+
+                        }
                     }
                 }
 
-                // Calcular la duración total de la animación de ataque
+                // Calcular duración de la animación de ataque
                 int totalDuration = 0;
                 AnimationDrawable attackAnimation = samurai.getAttackAnimation();
                 for (int i = 0; i < attackAnimation.getNumberOfFrames(); i++) {
                     totalDuration += attackAnimation.getDuration(i);
                 }
 
-                // Usar un Handler para volver a la animación correcta después de que termine el ataque
+                // Volver a la animación correcta después del ataque
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (movingLeft || movingRight) {
-                        setSamuraiAnimation(samurai.getRunAnimation()); // Volver a la animación de correr
+                        setSamuraiAnimation(samurai.getRunAnimation());
                     } else {
-                        setSamuraiAnimation(samurai.getIdleAnimation()); // Volver a la animación idle
+                        setSamuraiAnimation(samurai.getIdleAnimation());
                     }
-                    isAttacking = false; // Marcar que la animación de ataque ha terminado
+                    isAttacking = false;
                 }, totalDuration);
             }
         });
+
 
         btnLeft.setOnTouchListener((v, event) -> {
             switch (event.getAction()) {
@@ -158,6 +186,17 @@ public class GameFragment extends Fragment {
         animation.start();
     }
 
+    private void updateScore() {
+        // Obtener el valor de la cadena "score" desde los recursos
+        String scoreText = getString(R.string.score);
+
+        // Concatenar el valor de la cadena con el puntaje actual
+        String finalText = scoreText + " " + score;
+
+        // Actualizar el TextView con los puntos actuales
+        scoreTextView.setText(finalText);
+    }
+
     private void moveSamurai() {
         new Thread(() -> {
             while (isRunning) {
@@ -201,17 +240,17 @@ public class GameFragment extends Fragment {
                         case 1:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.flying_eye_run,
                                     R.drawable.flying_eye_attack, R.drawable.flying_eye_hit, R.drawable.flying_eye_death,
-                                    8, 8,  10, 4, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
+                                    3, spawnFromLeft, 1, "flying_eye");
                             break;
                         case 2:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.mushroom_run,
                                     R.drawable.mushroom_attack, R.drawable.mushroom_hit, R.drawable.mushroom_death,
-                                    8, 8,  4, 1, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
+                                    1, spawnFromLeft, 5, "mushroom");
                             break;
                         default:
                             enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.goblin_run,
                                     R.drawable.goblin_attack, R.drawable.goblin_hit, R.drawable.goblin_death,
-                                    8, 8,  10, 2, spawnFromLeft); // 8 fotogramas para run y attack, 4 para hit y death
+                                    2, spawnFromLeft, 3, "goblin");
                             break;
                     }
 
@@ -252,7 +291,21 @@ public class GameFragment extends Fragment {
 
                 // No actualizar ni dibujar enemigos marcados para eliminación
                 if (enemy.isMarkedForRemoval()) {
-                    enemies.remove(i);
+                    // Aumentar los puntos según el tipo de enemigo
+                    switch (enemy.getType()) {
+                        case "flying_eye":
+                            score += 10;
+                            break;
+                        case "goblin":
+                            score += 30;
+                            break;
+                        case "mushroom":
+                            score += 50;
+                            break;
+                    }
+                    updateScore(); // Actualizar el TextView con los puntos
+
+                    enemies.remove(i); // Eliminar el enemigo de la lista
                     i--; // Ajustar el índice después de eliminar un enemigo
                     continue;
                 }

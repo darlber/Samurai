@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Samurai</string>
+    <string name="score">Score: </string>
 </resources>

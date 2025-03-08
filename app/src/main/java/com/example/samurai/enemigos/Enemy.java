@@ -5,10 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
-import android.os.Handler;
-import android.os.Looper;
-import android.util.Log;
-
 import com.example.samurai.SpriteSheetAnimation;
 
 public class Enemy {
@@ -17,40 +13,31 @@ public class Enemy {
     private int width, height;
     private int speed;
     private boolean isFlipped;
-    private boolean isAttacking = false;
     private boolean shouldBeRemoved = false;
     private boolean isDead = false;
+    private int health;
+    private String type;
 
-    private int attackRange = 100; // Distancia para atacar
-    private int health = 3; // Vida del enemigo
-
-
-    public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet, int hitSpriteSheet, int deathSpriteSheet, int runFrameCount, int attackFrameCount, int fps, int speed, boolean spawnFromLeft) {
-
+    public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet,
+                 int hitSpriteSheet, int deathSpriteSheet, int speed, boolean spawnFromLeft, int health, String type) {
         Bitmap runSheet = BitmapFactory.decodeResource(context.getResources(), runSpriteSheet);
         Bitmap attackSheet = BitmapFactory.decodeResource(context.getResources(), attackSpriteSheet);
         Bitmap hitSheet = BitmapFactory.decodeResource(context.getResources(), hitSpriteSheet);
         Bitmap deathSheet = BitmapFactory.decodeResource(context.getResources(), deathSpriteSheet);
 
-        if (runSheet == null || attackSheet == null || hitSheet == null || deathSheet == null) {
-            throw new RuntimeException("Error: No se pudieron cargar las spritesheets correctamente.");
-        }
+        runAnimation = new SpriteSheetAnimation(runSheet, 8, 10);
+        attackAnimation = new SpriteSheetAnimation(attackSheet, 8, 10);
+        hitAnimation = new SpriteSheetAnimation(hitSheet, 4, 10);
+        deathAnimation = new SpriteSheetAnimation(deathSheet, 4, 10);
 
-        runAnimation = new SpriteSheetAnimation(runSheet, runFrameCount, fps);
-        attackAnimation = new SpriteSheetAnimation(attackSheet, attackFrameCount, fps);
-        hitAnimation = new SpriteSheetAnimation(hitSheet, 4, fps);
-        deathAnimation = new SpriteSheetAnimation(deathSheet, 4, fps);
-
-        currentAnimation = runAnimation; // Comienza con la animación de correr
+        this.health = health;
+        this.type = type;
+        currentAnimation = runAnimation;
 
         width = runAnimation.getFrameWidth();
         height = runAnimation.getFrameHeight();
 
-        if (spawnFromLeft) {
-            x = -width;
-        } else {
-            x = screenWidth;
-        }
+        x = spawnFromLeft ? -width : screenWidth;
         y = screenHeight - height + 40;
 
         this.speed = speed;
@@ -64,7 +51,9 @@ public class Enemy {
     public void takeDamage() {
         if (!isDead) {
             health--;
-            currentAnimation = hitAnimation; // Cambiar a animación de golpe
+            currentAnimation = hitAnimation;
+            currentAnimation.reset();
+
             if (health <= 0) {
                 die();
             }
@@ -76,35 +65,29 @@ public class Enemy {
     }
 
     public void update(int samuraiX, int samuraiWidth) {
-        // Si el enemigo está muerto, solo actualizar la animación de muerte
         if (isDead) {
-            currentAnimation.update(); // Actualizar la animación de muerte
-
-            // Verificar si la animación de muerte ha terminado
+            currentAnimation.update();
             if (currentAnimation == deathAnimation && currentAnimation.getCurrentFrame() == deathAnimation.getFrameCount() - 1) {
-                shouldBeRemoved = true; // Marcar para eliminación después de que la animación de muerte haya terminado
+                shouldBeRemoved = true;
             }
-            return; // No actualizar el comportamiento si está muerto
+            return;
         }
 
-        // Asegurar que siempre tenga una animación válida
-        if (currentAnimation == null) {
-            currentAnimation = runAnimation;
+        if (currentAnimation == hitAnimation) {
+            currentAnimation.update();
+            if (currentAnimation.getCurrentFrame() == hitAnimation.getFrameCount() - 1) {
+                currentAnimation = runAnimation;
+            }
+            return;
         }
 
-        // Actualizar la animación actual
         currentAnimation.update();
 
-        // Calcular la distancia al samurái
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
 
-        // Comportamiento del enemigo si no está muerto
-        if (distanceToSamurai > attackRange) {
-            isAttacking = false;
-            currentAnimation = runAnimation;
-
+        if (distanceToSamurai > 100) {
             if (enemyCenterX < samuraiCenterX) {
                 x += speed;
                 isFlipped = false;
@@ -113,21 +96,18 @@ public class Enemy {
                 isFlipped = true;
             }
         } else {
-            isAttacking = true;
             currentAnimation = attackAnimation;
         }
     }
 
     public void die() {
-        if (isDead) return; // Si ya está muerto, no hacer nada más
-
-        isDead = true; // Marcar como muerto
-        currentAnimation = deathAnimation; // Cambiar a la animación de muerte
-        currentAnimation.reset(); // Reiniciar la animación de muerte para asegurarnos de que comience desde el primer frame
+        isDead = true;
+        currentAnimation = deathAnimation;
+        currentAnimation.reset();
     }
 
     public void draw(Canvas canvas) {
-        if (shouldBeRemoved) return; // No dibujar si el enemigo está marcado para eliminación
+        if (shouldBeRemoved) return;
 
         Matrix matrix = new Matrix();
         if (isFlipped) {
@@ -139,7 +119,6 @@ public class Enemy {
 
         currentAnimation.draw(canvas, matrix);
     }
-
 
     public int getX() {
         return x;
@@ -155,5 +134,9 @@ public class Enemy {
 
     public int getHeight() {
         return height;
+    }
+
+    public String getType() {
+        return type;
     }
 }
