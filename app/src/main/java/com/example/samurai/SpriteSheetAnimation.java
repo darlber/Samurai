@@ -54,5 +54,8 @@ public class SpriteSheetAnimation {
         return frameHeight;
     }
 
+    public long getTotalDuration() {
+        return frameCount * frameTime; // Duración total en milisegundos
+    }
 
 }

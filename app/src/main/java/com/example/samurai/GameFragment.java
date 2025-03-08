@@ -68,6 +68,14 @@ public class GameFragment extends Fragment {
                 // Cambiar la animación del samurái a "ataque"
                 setSamuraiAnimation(samurai.getAttackAnimation());
 
+                // Verificar colisión con enemigos y restarles vida
+                for (int i = 0; i < enemies.size(); i++) {
+                    Enemy enemy = enemies.get(i);
+                    if (enemy.checkCollision((int) samuraiAnimation.getX(), (int) samuraiAnimation.getY(), samurai.getWidth(), samurai.getHeight())) {
+                        enemy.takeDamage(); // Quitar 1 punto de vida al enemigo
+                    }
+                }
+
                 // Calcular la duración total de la animación de ataque
                 int totalDuration = 0;
                 AnimationDrawable attackAnimation = samurai.getAttackAnimation();
@@ -78,11 +86,9 @@ public class GameFragment extends Fragment {
                 // Usar un Handler para volver a la animación correcta después de que termine el ataque
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
                     if (movingLeft || movingRight) {
-                        // Si el samurái está en movimiento, volver a la animación de correr
-                        setSamuraiAnimation(samurai.getRunAnimation());
+                        setSamuraiAnimation(samurai.getRunAnimation()); // Volver a la animación de correr
                     } else {
-                        // Si no está en movimiento, volver a la animación idle
-                        setSamuraiAnimation(samurai.getIdleAnimation());
+                        setSamuraiAnimation(samurai.getIdleAnimation()); // Volver a la animación idle
                     }
                     isAttacking = false; // Marcar que la animación de ataque ha terminado
                 }, totalDuration);
@@ -133,8 +139,15 @@ public class GameFragment extends Fragment {
 
         // Generar enemigos
         spawnEnemies();
-
         return rootView;
+    }
+    private void onAttack() {
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy enemy = enemies.get(i);
+            if (enemy.checkCollision((int) samuraiAnimation.getX(), (int) samuraiAnimation.getY(), samurai.getWidth(), samurai.getHeight())) {
+                enemy.takeDamage();
+            }
+        }
     }
 
     private void startSamuraiAnimation() {
@@ -188,19 +201,23 @@ public class GameFragment extends Fragment {
                     int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
                     // Crear diferentes tipos de enemigos
-                    int enemyType = random.nextInt(4); // Aleatorio entre 0 y 2
+                    int enemyType = random.nextInt(3); // Aleatorio entre 0 y 2
                     boolean spawnFromLeft = random.nextBoolean(); // Aparecer por la izquierda o derecha
 
                     Enemy enemy;
                     switch (enemyType) {
                         case 1:
-                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.flying_eye_run,R.drawable.flying_eye_attack, 8, 10, 4, spawnFromLeft);
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.flying_eye_run,
+                                    R.drawable.flying_eye_attack, R.drawable.flying_eye_hit, R.drawable.flying_eye_death, 8, 10, 4, spawnFromLeft);
                             break;
-                        case 3:
-                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.mushroom_run,R.drawable.mushroom_attack, 8, 4, 1, spawnFromLeft);
+                        case 2:
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.mushroom_run,
+                                    R.drawable.mushroom_attack, R.drawable.mushroom_hit, R.drawable.mushroom_death, 8, 4, 1, spawnFromLeft);
                             break;
                         default:
-                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.goblin_run,R.drawable.goblin_attack, 8, 10, 2, spawnFromLeft);
+                            enemy = new Enemy(requireContext(), screenWidth, screenHeight, R.drawable.goblin_run,
+                                    R.drawable.goblin_attack, R.drawable.goblin_hit, R.drawable.goblin_death, 8, 10, 2, spawnFromLeft);
+                            break;
                     }
 
                     enemies.add(enemy);
@@ -209,7 +226,7 @@ public class GameFragment extends Fragment {
                     enemyHandler.postDelayed(this, random.nextInt(2000) + 1000); // Generar enemigos cada 1-3 segundos
                 }
             }
-        }, 1000); // Comenzar a generar enemigos después de 1 segundo
+        }, 3000); // Comenzar a generar enemigos después de 1 segundo
     }
 
     @Override
