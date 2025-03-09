@@ -21,7 +21,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.samurai.enemigos.Enemy;
+import com.example.samurai.enemigos.EnemyManager;
 import com.example.samurai.jugador.Samurai;
+import com.example.samurai.jugador.SamuraiController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +31,10 @@ import java.util.Random;
 
 public class GameFragment extends Fragment {
     private Samurai samurai;
+    private SamuraiController samuraiController;
+    private EnemyManager enemyManager;
+    private ScoreManager scoreManager;
+
     private ImageView samuraiAnimation;
     private boolean isRunning = true;
     private boolean movingLeft = false;
@@ -52,6 +58,7 @@ public class GameFragment extends Fragment {
 
         // Obtener el TextView para mostrar los puntos
         scoreTextView = rootView.findViewById(R.id.scoreTextView);
+        scoreManager = new ScoreManager(requireContext(), scoreTextView);
 
         // Obtener dimensiones de la pantalla
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -186,17 +193,6 @@ public class GameFragment extends Fragment {
         animation.start();
     }
 
-    private void updateScore() {
-        // Obtener el valor de la cadena "score" desde los recursos
-        String scoreText = getString(R.string.score);
-
-        // Concatenar el valor de la cadena con el puntaje actual
-        String finalText = scoreText + " " + score;
-
-        // Actualizar el TextView con los puntos actuales
-        scoreTextView.setText(finalText);
-    }
-
     private void moveSamurai() {
         new Thread(() -> {
             while (isRunning) {
@@ -294,17 +290,15 @@ public class GameFragment extends Fragment {
                     // Aumentar los puntos según el tipo de enemigo
                     switch (enemy.getType()) {
                         case "flying_eye":
-                            score += 10;
+                            scoreManager.addScore(10);
                             break;
                         case "goblin":
-                            score += 30;
+                            scoreManager.addScore(30);
                             break;
                         case "mushroom":
-                            score += 50;
+                            scoreManager.addScore(50);
                             break;
                     }
-                    updateScore(); // Actualizar el TextView con los puntos
-
                     enemies.remove(i); // Eliminar el enemigo de la lista
                     i--; // Ajustar el índice después de eliminar un enemigo
                     continue;
