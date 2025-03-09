@@ -44,6 +44,7 @@ public class SamuraiController {
         btnRight.setOnTouchListener(this::handleRightMovement);
         btnAttack.setOnClickListener(v -> handleAttack());
         moveSamurai();
+        startSamuraiAnimation();
     }
 
     private boolean handleLeftMovement(View v, MotionEvent event) {
@@ -120,11 +121,7 @@ public class SamuraiController {
         animation.stop();
         animation.start();
     }
-    public void drawSamurai(Canvas canvas) {
-        samuraiAnimation.setX(samurai.getX());
-        samuraiAnimation.setY(samurai.getY());
-        samuraiAnimation.draw(canvas);
-    }
+
     public void startSamuraiAnimation() {
         // Cargar la animación desde el archivo XML
         samuraiAnimation.setBackgroundResource(R.drawable.idle_anim);
@@ -140,9 +137,23 @@ public class SamuraiController {
             while (true) {
                 samuraiAnimation.post(() -> {
                     if (movingLeft) {
-                        samuraiAnimation.setX(samuraiAnimation.getX() - 5);
+                        samurai.setX(samurai.getX() - 5);
+                        samuraiAnimation.setX(samurai.getX());
+                        // Verificar si el samurai sale por la izquierda
+                        if (samurai.getX() + samuraiAnimation.getWidth() < 0) {
+                            samurai.setX(context.getResources().getDisplayMetrics().widthPixels); // Coloca en el lado derecho
+                            samuraiAnimation.setX(samurai.getX());
+                        }
                     } else if (movingRight) {
-                        samuraiAnimation.setX(samuraiAnimation.getX() + 5);
+                        // Mover el ImageView y actualizar la posición interna del Samurai
+                        samurai.setX(samurai.getX() + 5);
+                        samuraiAnimation.setX(samurai.getX());
+
+                        // Verificar si el samurai sale por la derecha
+                        if (samurai.getX() > context.getResources().getDisplayMetrics().widthPixels) {
+                            samurai.setX(-samuraiAnimation.getWidth()); // Coloca en el lado izquierdo
+                            samuraiAnimation.setX(samurai.getX());
+                        }
                     }
                 });
                 try {
@@ -157,4 +168,5 @@ public class SamuraiController {
     public Samurai getSamurai() {
         return samurai;
     }
+
 }

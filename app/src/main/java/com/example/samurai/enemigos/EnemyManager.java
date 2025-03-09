@@ -75,13 +75,6 @@ public class EnemyManager {
         }
     }
 
-
-    public void drawEnemies(Canvas canvas) {
-        for (Enemy enemy : enemies) {
-            enemy.draw(canvas);
-        }
-    }
-
     public List<Enemy> getEnemies() {
         return enemies;
     }

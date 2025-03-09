@@ -86,8 +86,10 @@ public class Enemy {
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
+        // Agregar una distancia mínima para que el enemigo se detenga antes de llegar al samurái
+        int minimumDistance = 75; // Puedes ajustar esta distancia según sea necesario
 
-        if (distanceToSamurai > 100) {
+        if (distanceToSamurai > minimumDistance) {
             if (enemyCenterX < samuraiCenterX) {
                 x += speed;
                 isFlipped = false;
@@ -99,6 +101,7 @@ public class Enemy {
             currentAnimation = attackAnimation;
         }
     }
+
 
     public void die() {
         isDead = true;
