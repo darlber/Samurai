@@ -8,6 +8,7 @@ import android.view.View;
 import com.example.samurai.enemigos.Enemy;
 import com.example.samurai.enemigos.EnemyManager;
 import com.example.samurai.jugador.Samurai;
+import com.example.samurai.jugador.SamuraiController;
 
 import java.util.List;
 
@@ -17,15 +18,20 @@ public class CustomView extends View {
     private Samurai samurai;
     private ScoreManager scoreManager;
     private EnemyManager enemyManager;
+    private GameFragment gameFragment;
+    private SamuraiController samuraiController;
 
-    public CustomView(Context context, int screenWidth, int screenHeight, List<Enemy> enemies, EnemyManager enemyManager, Samurai samurai, ScoreManager scoreManager) {
+    public CustomView(Context context, int screenWidth, int screenHeight, List<Enemy> enemies,
+                      EnemyManager enemyManager, Samurai samurai, SamuraiController samuraiController, ScoreManager scoreManager, GameFragment gameFragment) {
         super(context);
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         this.enemies = enemies;
         this.samurai = samurai;
+        this.samuraiController = samuraiController;
         this.enemyManager = enemyManager;
-        this.scoreManager = scoreManager; // Store the scoreManager here
+        this.scoreManager = scoreManager;
+        this.gameFragment = gameFragment;
     }
 
     @Override
@@ -37,7 +43,7 @@ public class CustomView extends View {
         int samuraiWidth = samurai.getWidth();
 
         // Actualizar la posición de los enemigos en función del samurái
-        enemyManager.updateEnemies(samuraiX, samuraiWidth);
+        enemyManager.updateEnemies(samuraiX, samuraiWidth, samurai, samuraiController);
 
         // Dibujar todos los enemigos
         for (int i = 0; i < enemies.size(); i++) {
@@ -69,6 +75,12 @@ public class CustomView extends View {
                 enemies.remove(i);
                 i--; // Ajustar el índice después de eliminar un enemigo
             }
+        }
+
+        // Verificar si el samurái ha perdido toda su vida
+        if (samurai.isDead()) {
+            // Terminar el juego
+            gameFragment.endGame();
         }
 
         // Volver a dibujar la vista

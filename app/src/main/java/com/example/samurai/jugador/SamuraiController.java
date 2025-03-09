@@ -1,7 +1,6 @@
 package com.example.samurai.jugador;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -23,8 +22,8 @@ public class SamuraiController {
     private boolean movingLeft = false;
     private boolean movingRight = false;
     private boolean isAttacking = false;
-    private Handler movementHandler;
     private EnemyManager enemyManager;
+    private boolean isGamePaused = false;
     private Context context;
 
     public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight) {
@@ -36,7 +35,7 @@ public class SamuraiController {
         this.samuraiAnimation.setX(samurai.getX());
         this.samuraiAnimation.setY(samurai.getY());
 
-        this.movementHandler = new Handler(Looper.getMainLooper());
+        new Handler(Looper.getMainLooper());
     }
 
     public void setupControls(ImageButton btnLeft, ImageButton btnRight, Button btnAttack) {
@@ -87,6 +86,27 @@ public class SamuraiController {
             resetAttackAnimation();
         }
     }
+    public void startHurtAnimation() {
+        // Asegúrate de que la animación de daño esté configurada en el ImageView
+        setSamuraiAnimation(samurai.getHurtAnimation());
+
+        // Obtén la duración total de la animación de daño para después volver a la animación idle
+        int hurtAnimDuration = 0;
+        AnimationDrawable hurtAnimation = samurai.getHurtAnimation();
+        for (int i = 0; i < hurtAnimation.getNumberOfFrames(); i++) {
+            hurtAnimDuration += hurtAnimation.getDuration(i);
+        }
+
+        // Espera a que termine la animación de daño y luego vuelve a la animación idle
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Si el samurái está moviéndose, muestra la animación de correr
+            if (movingLeft || movingRight) {
+                setSamuraiAnimation(samurai.getRunAnimation());
+            } else {
+                setSamuraiAnimation(samurai.getIdleAnimation());
+            }
+        }, hurtAnimDuration);
+    }
 
     private void checkCollisions(int attackX, int attackY, int attackWidth, int attackHeight, boolean facingRight) {
         List<Enemy> enemies = enemyManager.getEnemies();
@@ -135,27 +155,28 @@ public class SamuraiController {
     private void moveSamurai() {
         new Thread(() -> {
             while (true) {
-                samuraiAnimation.post(() -> {
-                    if (movingLeft) {
-                        samurai.setX(samurai.getX() - 5);
-                        samuraiAnimation.setX(samurai.getX());
-                        // Verificar si el samurai sale por la izquierda
-                        if (samurai.getX() + samuraiAnimation.getWidth() < 0) {
-                            samurai.setX(context.getResources().getDisplayMetrics().widthPixels); // Coloca en el lado derecho
+                if (!isGamePaused) { // Solo mover si el juego NO está pausado
+                    samuraiAnimation.post(() -> {
+                        if (movingLeft) {
+                            samurai.setX(samurai.getX() - 7);
                             samuraiAnimation.setX(samurai.getX());
-                        }
-                    } else if (movingRight) {
-                        // Mover el ImageView y actualizar la posición interna del Samurai
-                        samurai.setX(samurai.getX() + 5);
-                        samuraiAnimation.setX(samurai.getX());
 
-                        // Verificar si el samurai sale por la derecha
-                        if (samurai.getX() > context.getResources().getDisplayMetrics().widthPixels) {
-                            samurai.setX(-samuraiAnimation.getWidth()); // Coloca en el lado izquierdo
+                            if (samurai.getX() + samuraiAnimation.getWidth() < 0) {
+                                samurai.setX(context.getResources().getDisplayMetrics().widthPixels);
+                                samuraiAnimation.setX(samurai.getX());
+                            }
+                        } else if (movingRight) {
+                            samurai.setX(samurai.getX() + 7);
                             samuraiAnimation.setX(samurai.getX());
+
+                            if (samurai.getX() > context.getResources().getDisplayMetrics().widthPixels) {
+                                samurai.setX(-samuraiAnimation.getWidth());
+                                samuraiAnimation.setX(samurai.getX());
+                            }
                         }
-                    }
-                });
+                    });
+                }
+
                 try {
                     Thread.sleep(16);
                 } catch (InterruptedException e) {
@@ -169,4 +190,7 @@ public class SamuraiController {
         return samurai;
     }
 
+    public void setGamePaused(boolean paused) {
+        this.isGamePaused = paused;
+    }
 }

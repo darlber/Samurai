@@ -1,11 +1,12 @@
 package com.example.samurai.enemigos;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.os.Handler;
 import android.os.Looper;
 
 import com.example.samurai.R;
+import com.example.samurai.jugador.Samurai;
+import com.example.samurai.jugador.SamuraiController;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,6 +20,7 @@ public class EnemyManager {
     private Context context;
     private int screenWidth, screenHeight;
     private static final int MAX_ENEMIES = 10;
+    private boolean isGamePaused= false;
 
     public EnemyManager(Context context, int screenWidth, int screenHeight) {
         this.context = context;
@@ -63,19 +65,25 @@ public class EnemyManager {
         }, 1000);
     }
 
-    public void updateEnemies(int samuraiX, int samuraiWidth) {
+    public void updateEnemies(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController) {
+        if (isGamePaused) return;
+
         Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
             Enemy enemy = iterator.next();
             if (enemy.isMarkedForRemoval()) {
                 iterator.remove();
             } else {
-                enemy.update(samuraiX, samuraiWidth);
+                enemy.update(samuraiX, samuraiWidth, samurai, samuraiController);
             }
         }
     }
 
     public List<Enemy> getEnemies() {
         return enemies;
+    }
+
+    public void setGamePaused(boolean paused) {
+        this.isGamePaused = paused;
     }
 }

@@ -13,15 +13,21 @@ public class Samurai {
     private AnimationDrawable idleAnimation;
     private AnimationDrawable runAnimation;
     private AnimationDrawable attackAnimation;
+    private AnimationDrawable hurtAnimation;
     private int x, y; // Posición del samurái
     private int width, height; // Tamaño del samurái
+    private int health;
+
 
     public Samurai(Context context, int screenWidth, int screenHeight) {
         // Cargar la animación desde el archivo XML
         idleAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.idle_anim, null);
         runAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.run_anim, null);
-        attackAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.attack_anim, null); // Cargar animación de ataque
-        if (idleAnimation == null || runAnimation == null || attackAnimation == null) {
+        // Cargar animación de ataque
+        attackAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.attack_anim, null);
+        // Cargar animación de daño
+        hurtAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.hurt_anim, null);
+        if (idleAnimation == null || runAnimation == null || attackAnimation == null || hurtAnimation == null) {
             throw new RuntimeException("No se pudo cargar la animación del samurái.");
         }
 
@@ -33,8 +39,26 @@ public class Samurai {
         // Posicionar al samurái en la mitad inferior de la pantalla
         x = (screenWidth - width) / 2; // Centrado horizontalmente
         y = screenHeight - height - 100; // 100 píxeles desde la parte inferior
-
+        health = 5;
         Log.d("Samurai", "Animación cargada correctamente: " + width + "x" + height);
+    }
+
+    // Métodos para manejar la vida
+    public int getHealth() {
+        return health;
+    }
+
+    public void takeDamage(SamuraiController samuraiController) {
+        if (!isDead()) { // Solo reducir la vida si el samurái no está muerto
+            health--;
+            Log.d("Samurai", "Vida restante: " + health); // Agrega un log para depurar
+            samuraiController.startHurtAnimation();
+        }
+    }
+
+
+    public boolean isDead() {
+        return health <= 0;
     }
 
     public AnimationDrawable getIdleAnimation() {
@@ -49,12 +73,8 @@ public class Samurai {
         return attackAnimation;
     }
 
-    public void setAttackAnimation(AnimationDrawable attackAnimation) {
-        this.attackAnimation = attackAnimation;
-    }
-
-    public void setRunAnimation(AnimationDrawable runAnimation) {
-        this.runAnimation = runAnimation;
+    public AnimationDrawable getHurtAnimation() {
+        return hurtAnimation;
     }
 
     public int getX() {

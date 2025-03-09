@@ -6,6 +6,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import com.example.samurai.SpriteSheetAnimation;
+import com.example.samurai.jugador.Samurai;
+import com.example.samurai.jugador.SamuraiController;
 
 public class Enemy {
     private SpriteSheetAnimation runAnimation, attackAnimation, currentAnimation, hitAnimation, deathAnimation;
@@ -64,7 +66,7 @@ public class Enemy {
         return shouldBeRemoved;
     }
 
-    public void update(int samuraiX, int samuraiWidth) {
+    public void update(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController) {
         if (isDead) {
             currentAnimation.update();
             if (currentAnimation == deathAnimation && currentAnimation.getCurrentFrame() == deathAnimation.getFrameCount() - 1) {
@@ -86,8 +88,7 @@ public class Enemy {
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
-        // Agregar una distancia mínima para que el enemigo se detenga antes de llegar al samurái
-        int minimumDistance = 75; // Puedes ajustar esta distancia según sea necesario
+        int minimumDistance = 100; // Distancia mínima para atacar
 
         if (distanceToSamurai > minimumDistance) {
             if (enemyCenterX < samuraiCenterX) {
@@ -98,7 +99,21 @@ public class Enemy {
                 isFlipped = true;
             }
         } else {
-            currentAnimation = attackAnimation;
+            // Cambiar a la animación de ataque si no está atacando
+            if (currentAnimation != attackAnimation) {
+                currentAnimation = attackAnimation;
+                currentAnimation.reset(); // Reiniciar la animación de ataque
+            }
+
+            // Verificar si la animación de ataque está en su último frame
+            if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
+                // Aplicar daño solo si el enemigo colisiona con el samurái
+                if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
+                    samurai.takeDamage(samuraiController);
+                    currentAnimation = runAnimation;
+
+                }
+            }
         }
     }
 
