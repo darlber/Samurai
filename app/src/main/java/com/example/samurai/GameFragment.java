@@ -67,7 +67,7 @@ public class GameFragment extends Fragment {
                 screenWidth,
                 screenHeight
         );
-        samuraiController.setupControls(btnLeft, btnRight, btnAttack, btnSpecialAttack);
+        samuraiController.setupControls(btnLeft, btnRight, btnAttack, btnSpecialAttack, rootView);
         handleBackButton();
         pauseButton.setOnClickListener(v -> togglePause());
         // Crear y agregar CustomView para dibujar enemigos

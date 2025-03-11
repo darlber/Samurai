@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -29,6 +31,7 @@ public class SamuraiController {
     private Button btnSpecialAttack;
     private boolean canAttack = true;
     private static final int ATTACK_COOLDOWN = 150; // 150 ms
+    private GestureDetector gestureDetector;
 
 
     public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight) {
@@ -39,16 +42,20 @@ public class SamuraiController {
         this.samurai = new Samurai(context, screenWidth, screenHeight);
         this.samuraiAnimation.setX(samurai.getX());
         this.samuraiAnimation.setY(samurai.getY());
-
+        gestureDetector = new GestureDetector(context, new GestureListener(this));
         new Handler(Looper.getMainLooper());
     }
 
-    public void setupControls(ImageButton btnLeft, ImageButton btnRight, Button btnAttack, Button btnSpecialAttack) {
-        this.btnSpecialAttack = btnSpecialAttack; // Asignar el botón a la variable de instancia
+    public void setupControls(ImageButton btnLeft, ImageButton btnRight, Button btnAttack, Button btnSpecialAttack, View rootView) {
+        this.btnSpecialAttack = btnSpecialAttack;// Asignar el botón a la variable de instancia
         btnLeft.setOnTouchListener(this::handleLeftMovement);
         btnRight.setOnTouchListener(this::handleRightMovement);
         btnAttack.setOnClickListener(v -> handleAttack());
         btnSpecialAttack.setOnClickListener(v -> handleSpecialAttack());
+        // Detectar gestos en toda la pantalla
+        rootView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+
+
         moveSamurai();
         startSamuraiAnimation();
         btnSpecialAttack.setEnabled(false); // Deshabilitar el botón al inicio
@@ -98,8 +105,7 @@ public class SamuraiController {
         setSamuraiAnimation(samurai.getAttackAnimation());
         boolean facingRight = samuraiAnimation.getScaleX() > 0;
         int attackWidth = samurai.getWidth() / 3;
-        int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2
-                : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
+        int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2 : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
         int attackY = (int) samuraiAnimation.getY();
         int attackHeight = samurai.getHeight();
         checkCollisions(attackX, attackY, attackWidth, attackHeight, facingRight);
@@ -236,6 +242,43 @@ public class SamuraiController {
             }
         }).start();
     }
+
+    void performDash(boolean toRight) {
+        if (isAttacking) {
+            return; // No realizar dash si está atacando
+        }
+        isAttacking = true;
+        samurai.setInvulnerable(true); // El samurái es invulnerable durante el dash
+        setSamuraiAnimation(samurai.getDashAnimation());
+
+        int dashDistance = 200; // Distancia del dash
+        int dashDuration = 300; // Duración del dash en milisegundos
+
+        if (toRight) {
+            // Cambiar la dirección para que el samurái mire hacia la derecha
+            samurai.setX(samurai.getX() + dashDistance);
+            samuraiAnimation.setScaleX(1); // Volteamos el personaje a la derecha
+        } else {
+            // Cambiar la dirección para que el samurái mire hacia la izquierda
+            samurai.setX(samurai.getX() - dashDistance);
+            samuraiAnimation.setScaleX(-1); // Volteamos el personaje a la izquierda
+        }
+
+        samuraiAnimation.setX(samurai.getX());
+
+        // Después de que termine el dash, se vuelve a poner como vulnerable
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            isAttacking = false;
+            samurai.setInvulnerable(false); // El samurái ya no es invulnerable
+            // Después de que termine el dash, si el samurái está moviéndose, vuelve a la animación de correr
+            if (movingLeft || movingRight) {
+                setSamuraiAnimation(samurai.getRunAnimation());
+            } else {
+                setSamuraiAnimation(samurai.getIdleAnimation());
+            }
+        }, dashDuration);
+    }
+
 
     public Samurai getSamurai() {
         return samurai;

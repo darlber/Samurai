@@ -17,6 +17,9 @@ public class Samurai {
     private int x, y; // Posición del samurái
     private int width, height; // Tamaño del samurái
     private int health;
+    private boolean isInvulnerable = false;
+    private AnimationDrawable dashAnimation;
+
 
 
     public Samurai(Context context, int screenWidth, int screenHeight) {
@@ -27,6 +30,10 @@ public class Samurai {
         attackAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.attack_anim, null);
         // Cargar animación de daño
         hurtAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.hurt_anim, null);
+        dashAnimation = (AnimationDrawable) ResourcesCompat.getDrawable(context.getResources(), R.drawable.run_anim, null);
+        if (dashAnimation == null) {
+            throw new RuntimeException("No se pudo cargar la animación de dash del samurái.");
+        }
         if (idleAnimation == null || runAnimation == null || attackAnimation == null || hurtAnimation == null) {
             throw new RuntimeException("No se pudo cargar la animación del samurái.");
         }
@@ -49,7 +56,7 @@ public class Samurai {
     }
 
     public void takeDamage(SamuraiController samuraiController) {
-        if (!isDead()) { // Solo reducir la vida si el samurái no está muerto
+        if (!isInvulnerable() && !isDead()) { // Solo reducir la vida si el samurái no está muerto y no está invulnerable
             health--;
             Log.d("Samurai", "Vida restante: " + health); // Agrega un log para depurar
             samuraiController.startHurtAnimation();
@@ -57,8 +64,21 @@ public class Samurai {
     }
 
 
+
     public boolean isDead() {
         return health <= 0;
+    }
+
+    public AnimationDrawable getDashAnimation() {
+        return dashAnimation;
+    }
+
+    public boolean isInvulnerable() {
+        return isInvulnerable;
+    }
+
+    public void setInvulnerable(boolean invulnerable) {
+        isInvulnerable = invulnerable;
     }
 
     public AnimationDrawable getIdleAnimation() {
