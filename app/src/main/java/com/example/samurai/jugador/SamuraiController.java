@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -34,6 +35,7 @@ public class SamuraiController {
     private GestureDetector gestureDetector;
 
 
+
     public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight) {
         this.context = context;
         this.samuraiAnimation = samuraiAnimation;
@@ -53,7 +55,8 @@ public class SamuraiController {
         btnAttack.setOnClickListener(v -> handleAttack());
         btnSpecialAttack.setOnClickListener(v -> handleSpecialAttack());
         // Detectar gestos en toda la pantalla
-        rootView.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+        rootView.setOnTouchListener((v, event) ->
+                        gestureDetector.onTouchEvent(event));
 
 
         moveSamurai();
@@ -105,11 +108,14 @@ public class SamuraiController {
         setSamuraiAnimation(samurai.getAttackAnimation());
         boolean facingRight = samuraiAnimation.getScaleX() > 0;
         int attackWidth = samurai.getWidth() / 3;
-        int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2 : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
+        int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2
+                : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
         int attackY = (int) samuraiAnimation.getY();
         int attackHeight = samurai.getHeight();
         checkCollisions(attackX, attackY, attackWidth, attackHeight, facingRight);
         resetAttackAnimation();
+        new Handler(Looper.getMainLooper()).postDelayed(() -> canAttack = true, ATTACK_COOLDOWN);
+
     }
 
     private void resetAttackAnimation() {
@@ -242,41 +248,77 @@ public class SamuraiController {
             }
         }).start();
     }
-
-    void performDash(boolean toRight) {
+    public void performDash(boolean toRight) {
         if (isAttacking) {
             return; // No realizar dash si está atacando
         }
         isAttacking = true;
-        samurai.setInvulnerable(true); // El samurái es invulnerable durante el dash
+        samurai.setInvulnerable(true);
         setSamuraiAnimation(samurai.getDashAnimation());
 
         int dashDistance = 200; // Distancia del dash
         int dashDuration = 300; // Duración del dash en milisegundos
+        int numAfterImages = 5; // Número de afterimages a generar
+        float transparencyStep = 0.2f; // Controla la velocidad de desaparición
+
+        // Generar afterimages
+        generateAfterImages(toRight, numAfterImages, transparencyStep);
 
         if (toRight) {
-            // Cambiar la dirección para que el samurái mire hacia la derecha
             samurai.setX(samurai.getX() + dashDistance);
-            samuraiAnimation.setScaleX(1); // Volteamos el personaje a la derecha
+            samuraiAnimation.setScaleX(1.5f); // Volteamos el personaje a la derecha
         } else {
-            // Cambiar la dirección para que el samurái mire hacia la izquierda
             samurai.setX(samurai.getX() - dashDistance);
-            samuraiAnimation.setScaleX(-1); // Volteamos el personaje a la izquierda
+            samuraiAnimation.setScaleX(-1.5f); // Volteamos el personaje a la izquierda
         }
-
         samuraiAnimation.setX(samurai.getX());
 
-        // Después de que termine el dash, se vuelve a poner como vulnerable
+        // Después de que termine el dash, revertir la animación y limpiar afterimages
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             isAttacking = false;
-            samurai.setInvulnerable(false); // El samurái ya no es invulnerable
-            // Después de que termine el dash, si el samurái está moviéndose, vuelve a la animación de correr
+            samurai.setInvulnerable(false);
             if (movingLeft || movingRight) {
                 setSamuraiAnimation(samurai.getRunAnimation());
             } else {
                 setSamuraiAnimation(samurai.getIdleAnimation());
             }
+            clearAfterImages(); // Limpiar afterimages
         }, dashDuration);
+    }
+
+    private void generateAfterImages(boolean toRight, int numAfterImages, float transparencyStep) {
+        for (int i = 0; i < numAfterImages; i++) {
+            final ImageView afterImage = new ImageView(context);
+            afterImage.setBackground(samuraiAnimation.getBackground()); // Copiar la imagen del samurái
+            afterImage.setAlpha(1 - i * transparencyStep); // Desaparecer gradualmente
+
+            // Asegurarse de que estamos trabajando con un ViewGroup (padre del ImageView del samurái)
+            ViewGroup parentView = (ViewGroup) samuraiAnimation.getParent();
+
+            if (parentView != null) {
+                int finalI = i;
+                parentView.post(() -> {
+                    // Posicionar la afterimage en la posición actual del samurái
+                    float afterImageX = samuraiAnimation.getX() - (toRight ? 30 : -30) * (finalI + 1);
+                    float afterImageY = samuraiAnimation.getY();
+                    afterImage.setX(afterImageX);
+                    afterImage.setY(afterImageY);
+
+                    // Agregar la afterimage al contenedor
+                    parentView.addView(afterImage);
+
+                    // Eliminar afterimage después de un breve tiempo
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        parentView.removeView(afterImage);
+                    }, 100);
+                });
+            }
+        }
+    }
+
+    private void clearAfterImages() {
+        // Esta función puede eliminar todas las afterimages si alguna queda en la pantalla
+        // Aunque en este caso, las afterimages ya se eliminan automáticamente después de 100 ms
     }
 
 
