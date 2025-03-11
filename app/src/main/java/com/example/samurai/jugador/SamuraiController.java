@@ -19,6 +19,17 @@ import com.example.samurai.enemigos.EnemyManager;
 
 import java.util.List;
 
+
+//TODO ataqueespecialreseteaandose cada vez que llega a 10, no deberia
+//TODO cambiar botones más bonitos
+//TODO el array de los enemigos va ampliandose cada x tiempo, no es necesario tanto
+//TODO more enemies en pantalla cada x tiempo
+//TODO pantalla principal
+//TODO pantalla de game over
+//TODO cambiar quizas los alertdialog?
+// TODO usar onStop y onStart para pausar el juego, onDestroy para liberar recursos,
+//  onRestart para reanudar el juego, onPause y onResume para pausar y reanudar la música
+//TODO musica
 public class SamuraiController {
     private Samurai samurai;
     private ImageView samuraiAnimation;
