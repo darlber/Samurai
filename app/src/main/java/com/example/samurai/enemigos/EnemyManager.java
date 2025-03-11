@@ -1,3 +1,4 @@
+// EnemyManager.java
 package com.example.samurai.enemigos;
 
 import android.content.Context;
@@ -19,8 +20,9 @@ public class EnemyManager {
     private Random random;
     private Context context;
     private int screenWidth, screenHeight;
-    private static final int MAX_ENEMIES = 10;
-    private boolean isGamePaused= false;
+    private int maxEnemies = 10; // Variable para el número máximo de enemigos
+    private int spawnInterval = 3000; // Intervalo de aparición de enemigos en milisegundos
+    private boolean isGamePaused = false;
 
     public EnemyManager(Context context, int screenWidth, int screenHeight) {
         this.context = context;
@@ -29,13 +31,14 @@ public class EnemyManager {
         this.enemies = new ArrayList<>();
         this.enemyHandler = new Handler(Looper.getMainLooper());
         this.random = new Random();
+        increaseDifficultyOverTime(); // Iniciar el aumento de dificultad
     }
 
     public void spawnEnemies() {
         enemyHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (enemies.size() < MAX_ENEMIES) {
+                if (enemies.size() < maxEnemies) {
                     int enemyType = random.nextInt(3);
                     boolean spawnFromLeft = random.nextBoolean();
 
@@ -59,10 +62,24 @@ public class EnemyManager {
                     }
 
                     enemies.add(enemy);
-                    enemyHandler.postDelayed(this, random.nextInt(2000) + 1000);
+                    enemyHandler.postDelayed(this, random.nextInt(spawnInterval) + 1000);
                 }
             }
         }, 1000);
+    }
+
+    //cada 15 segundos, 1 enemigo más y el intervalo de aparición disminuye en 500ms
+    private void increaseDifficultyOverTime() {
+        enemyHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                maxEnemies++; // Incrementar el número máximo de enemigos
+                if (spawnInterval > 1000) {
+                    spawnInterval -= 500; // Reducir el intervalo de aparición de enemigos
+                }
+                enemyHandler.postDelayed(this, 15000); // Incrementar cada 30 segundos
+            }
+        }, 15000);
     }
 
     public void updateEnemies(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController) {

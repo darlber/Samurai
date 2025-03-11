@@ -52,6 +52,7 @@ public class GameFragment extends Fragment {
         ImageButton btnRight = rootView.findViewById(R.id.btnRight);
         Button btnAttack = rootView.findViewById(R.id.btnAttack);
         ImageView pauseButton = rootView.findViewById(R.id.pauseButton);
+        Button btnSpecialAttack = rootView.findViewById(R.id.btnSpecialAttack);
         // Obtener el TextView del puntaje
         TextView scoreTextView = rootView.findViewById(R.id.scoreTextView);
         TextView healthTextView = rootView.findViewById(R.id.healthTextView); // TextView para la vida
@@ -66,7 +67,7 @@ public class GameFragment extends Fragment {
                 screenWidth,
                 screenHeight
         );
-        samuraiController.setupControls(btnLeft, btnRight, btnAttack);
+        samuraiController.setupControls(btnLeft, btnRight, btnAttack, btnSpecialAttack);
         handleBackButton();
         pauseButton.setOnClickListener(v -> togglePause());
         // Crear y agregar CustomView para dibujar enemigos

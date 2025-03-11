@@ -65,9 +65,22 @@
         android:layout_toEndOf="@id/btnLeft"
         android:alpha="0.7"
         android:scaleType="center"
-
         android:src="@drawable/baseline_arrow_right_24"
         android:text="Derecha" />
+
+    <Button
+        android:id="@+id/btnSpecialAttack"
+        android:layout_width="148dp"
+        android:layout_height="129dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="16dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_above="@id/btnAttack"
+        android:text="Ataque Especial" />
 
     <Button
         android:id="@+id/btnAttack"
@@ -82,6 +95,7 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:text="Atacar" />
+
     <!-- ImageView para la animación del samurái -->
     <ImageView
         android:id="@+id/samuraiAnimation"

@@ -25,6 +25,11 @@ public class SamuraiController {
     private EnemyManager enemyManager;
     private boolean isGamePaused = false;
     private Context context;
+    private int enemiesDefeated = 0;
+    private Button btnSpecialAttack;
+    private boolean canAttack = true;
+    private static final int ATTACK_COOLDOWN = 150; // 150 ms
+
 
     public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight) {
         this.context = context;
@@ -38,22 +43,30 @@ public class SamuraiController {
         new Handler(Looper.getMainLooper());
     }
 
-    public void setupControls(ImageButton btnLeft, ImageButton btnRight, Button btnAttack) {
+    public void setupControls(ImageButton btnLeft, ImageButton btnRight, Button btnAttack, Button btnSpecialAttack) {
+        this.btnSpecialAttack = btnSpecialAttack; // Asignar el botón a la variable de instancia
         btnLeft.setOnTouchListener(this::handleLeftMovement);
         btnRight.setOnTouchListener(this::handleRightMovement);
         btnAttack.setOnClickListener(v -> handleAttack());
+        btnSpecialAttack.setOnClickListener(v -> handleSpecialAttack());
         moveSamurai();
         startSamuraiAnimation();
+        btnSpecialAttack.setEnabled(false); // Deshabilitar el botón al inicio
+        updateSpecialAttackButtonText(); // Inicializar el texto del botón
     }
 
     private boolean handleLeftMovement(View v, MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             movingLeft = true;
             samuraiAnimation.setScaleX(-1.5f);
-            setSamuraiAnimation(samurai.getRunAnimation());
+            if (!isAttacking) { // Solo cambiar animación si no está atacando
+                setSamuraiAnimation(samurai.getRunAnimation());
+            }
         } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
             movingLeft = false;
-            setSamuraiAnimation(samurai.getIdleAnimation());
+            if (!isAttacking) { // Solo cambiar animación si no está atacando
+                setSamuraiAnimation(samurai.getIdleAnimation());
+            }
             v.performClick();
         }
         return true;
@@ -63,29 +76,55 @@ public class SamuraiController {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
             movingRight = true;
             samuraiAnimation.setScaleX(1.5f);
-            setSamuraiAnimation(samurai.getRunAnimation());
+            if (!isAttacking) { // Solo cambiar animación si no está atacando
+                setSamuraiAnimation(samurai.getRunAnimation());
+            }
         } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_CANCEL) {
             movingRight = false;
-            setSamuraiAnimation(samurai.getIdleAnimation());
+            if (!isAttacking) { // Solo cambiar animación si no está atacando
+                setSamuraiAnimation(samurai.getIdleAnimation());
+            }
             v.performClick();
         }
         return true;
     }
 
+
     private void handleAttack() {
-        if (!isAttacking) {
-            isAttacking = true;
-            setSamuraiAnimation(samurai.getAttackAnimation());
-            boolean facingRight = samuraiAnimation.getScaleX() > 0;
-            int attackWidth = samurai.getWidth() / 3;
-            int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2
-                    : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
-            int attackY = (int) samuraiAnimation.getY();
-            int attackHeight = samurai.getHeight();
-            checkCollisions(attackX, attackY, attackWidth, attackHeight, facingRight);
-            resetAttackAnimation();
+        if (isAttacking) {
+            return; // Salir si ya se está realizando un ataque
         }
+        isAttacking = true;
+        setSamuraiAnimation(samurai.getAttackAnimation());
+        boolean facingRight = samuraiAnimation.getScaleX() > 0;
+        int attackWidth = samurai.getWidth() / 3;
+        int attackX = facingRight ? (int) samuraiAnimation.getX() + samurai.getWidth() / 2
+                : (int) samuraiAnimation.getX() + samurai.getWidth() / 2 - attackWidth;
+        int attackY = (int) samuraiAnimation.getY();
+        int attackHeight = samurai.getHeight();
+        checkCollisions(attackX, attackY, attackWidth, attackHeight, facingRight);
+        resetAttackAnimation();
     }
+
+    private void resetAttackAnimation() {
+        int totalDuration = 0;
+        AnimationDrawable attackAnimation = samurai.getAttackAnimation();
+        for (int i = 0; i < attackAnimation.getNumberOfFrames(); i++) {
+            totalDuration += attackAnimation.getDuration(i);
+        }
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            isAttacking = false;
+            // Solo cambiar la animación si el ataque terminó y no se está moviendo
+            if (movingLeft || movingRight) {
+                setSamuraiAnimation(samurai.getRunAnimation());
+            } else {
+                setSamuraiAnimation(samurai.getIdleAnimation());
+            }
+        }, totalDuration);
+    }
+
+
     public void startHurtAnimation() {
         // Asegúrate de que la animación de daño esté configurada en el ImageView
         setSamuraiAnimation(samurai.getHurtAnimation());
@@ -113,28 +152,40 @@ public class SamuraiController {
         for (Enemy enemy : enemies) {
             if ((facingRight && enemy.getX() > samuraiAnimation.getX()) || (!facingRight && enemy.getX() < samuraiAnimation.getX())) {
                 if (enemy.checkCollision(attackX, attackY, attackWidth, attackHeight)) {
-                    enemy.takeDamage();
+                    enemy.takeDamage(1, this); // Aplica 1 punto de daño al enemigo
                 }
             }
         }
     }
 
-
-    private void resetAttackAnimation() {
-        int totalDuration = 0;
-        AnimationDrawable attackAnimation = samurai.getAttackAnimation();
-        for (int i = 0; i < attackAnimation.getNumberOfFrames(); i++) {
-            totalDuration += attackAnimation.getDuration(i);
+    private void updateSpecialAttackButton() {
+        if (enemiesDefeated >= 10) {
+            btnSpecialAttack.setEnabled(true);
+            enemiesDefeated = 0; // Reiniciar el contador
+        } else {
+            btnSpecialAttack.setEnabled(false);
         }
-        new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (movingLeft || movingRight) {
-                setSamuraiAnimation(samurai.getRunAnimation());
-            } else {
-                setSamuraiAnimation(samurai.getIdleAnimation());
-            }
-            isAttacking = false;
-        }, totalDuration);
+        updateSpecialAttackButtonText(); // Actualizar el texto del botón
     }
+
+    private void updateSpecialAttackButtonText() {
+        int remainingEnemies = 10 - enemiesDefeated;
+        btnSpecialAttack.setText("Ataque Especial (" + remainingEnemies + ")");
+    }
+
+    public void incrementEnemiesDefeated() {
+        enemiesDefeated++;
+        updateSpecialAttackButton();
+        updateSpecialAttackButtonText();
+    }
+
+    private void handleSpecialAttack() {
+        List<Enemy> enemies = enemyManager.getEnemies();
+        for (Enemy enemy : enemies) {
+            enemy.takeDamage(5, this); // Aplica 5 puntos de daño a cada enemigo
+        }
+    }
+
 
     public void setSamuraiAnimation(AnimationDrawable animation) {
         samuraiAnimation.setBackground(animation);

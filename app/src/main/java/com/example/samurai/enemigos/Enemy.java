@@ -50,14 +50,15 @@ public class Enemy {
         return (x < samuraiX + samuraiWidth && x + width > samuraiX && y < samuraiY + samuraiHeight && y + height > samuraiY);
     }
 
-    public void takeDamage() {
+    public void takeDamage(int damage, SamuraiController samuraiController) {
         if (!isDead) {
-            health--;
+            this.health -= damage;
             currentAnimation = hitAnimation;
             currentAnimation.reset();
 
             if (health <= 0) {
                 die();
+                samuraiController.incrementEnemiesDefeated(); // Notificar al SamuraiController
             }
         }
     }
@@ -83,14 +84,17 @@ public class Enemy {
             return;
         }
 
-        currentAnimation.update();
-
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
         int minimumDistance = 100; // Distancia mínima para atacar
 
         if (distanceToSamurai > minimumDistance) {
+            // Si el enemigo está en attackAnimation pero el jugador ya se alejó, cambiar a runAnimation
+            if (currentAnimation == attackAnimation) {
+                currentAnimation = runAnimation;
+            }
+
             if (enemyCenterX < samuraiCenterX) {
                 x += speed;
                 isFlipped = false;
@@ -102,20 +106,20 @@ public class Enemy {
             // Cambiar a la animación de ataque si no está atacando
             if (currentAnimation != attackAnimation) {
                 currentAnimation = attackAnimation;
-                currentAnimation.reset(); // Reiniciar la animación de ataque
+                currentAnimation.reset();
             }
 
-            // Verificar si la animación de ataque está en su último frame
             if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
-                // Aplicar daño solo si el enemigo colisiona con el samurái
                 if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
                     samurai.takeDamage(samuraiController);
-                    currentAnimation = runAnimation;
-
+                    currentAnimation = runAnimation;  // Asegurar que después de atacar vuelva a correr
                 }
             }
         }
+
+        currentAnimation.update();
     }
+
 
 
     public void die() {
