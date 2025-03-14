@@ -33,12 +33,11 @@ public class SpriteSheetAnimation {
         }
     }
 
-    public void draw (Canvas canvas, Matrix matrix) {
+    public void draw(Canvas canvas, Matrix matrix) {
         // Calcular la porción de la spritesheet que corresponde al frame actual
         int srcX = currentFrame * frameWidth;
         Rect srcRect = new Rect(srcX, 0, srcX + frameWidth, frameHeight);
         RectF dstRect = new RectF(0, 0, frameWidth, frameHeight);
-
         // Dibujar el frame actual en el canvas usando la matriz
         canvas.save();
         canvas.concat(matrix);
@@ -53,15 +52,19 @@ public class SpriteSheetAnimation {
     public int getFrameHeight() {
         return frameHeight;
     }
+
     public int getFrameCount() {
         return frameCount;
     }
+
     public long getTotalDuration() {
         return frameCount * frameTime; // Duración total en milisegundos
     }
+
     public int getCurrentFrame() {
         return currentFrame;
     }
+
     public void reset() {
         currentFrame = 0; // Reiniciar al primer frame
         lastFrameTime = System.currentTimeMillis(); // Reiniciar el tiempo del último frame

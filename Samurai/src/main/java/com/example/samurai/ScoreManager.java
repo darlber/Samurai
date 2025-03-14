@@ -7,8 +7,8 @@ import android.widget.TextView;
 public class ScoreManager {
     private int score;
     private int highScore;
-    private TextView scoreTextView;
-    private Context context;
+    private final TextView scoreTextView;
+    private final Context context;
 
     public ScoreManager(Context context, TextView scoreTextView) {
         this.context = context;
@@ -44,9 +44,11 @@ public class ScoreManager {
         editor.putInt("score", score);
         editor.apply();
     }
+
     public int getHighScore() {
         return highScore;
     }
+
     public void resetScore() {
         score = 0;
         updateScoreText();

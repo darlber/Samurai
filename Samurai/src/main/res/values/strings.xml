@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Samurai</string>
+    <string name="score">Score: </string>
+    <string name="ready">Ready</string>
+<string name="health_text">Vida: %1$d</string>
+    <string name="remaining">Ataque Especial (%1$d)</string>
+    <string name="vida">"Vida: "</string>
+</resources>

@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -34,103 +33,86 @@ public class GameFragment extends Fragment {
     private List<Enemy> enemies = new ArrayList<>();
     private boolean isGameRunning = true;
     private boolean isGamePaused = false;
+    private View innerCircle, outerCircle;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.game_layout, container, false);
-        // Obtener dimensiones de la pantalla
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
         samuraiAnimation = rootView.findViewById(R.id.samuraiAnimation);
-        // TextView para mostrar los puntos
-        rootView.findViewById(R.id.scoreTextView);
-        // Configurar botones
-        ImageButton btnLeft = rootView.findViewById(R.id.btnLeft);
-        ImageButton btnRight = rootView.findViewById(R.id.btnRight);
+        outerCircle = rootView.findViewById(R.id.outerCircle);
+        innerCircle = rootView.findViewById(R.id.innerCircle);
         Button btnAttack = rootView.findViewById(R.id.btnAttack);
         ImageView pauseButton = rootView.findViewById(R.id.pauseButton);
         Button btnSpecialAttack = rootView.findViewById(R.id.btnSpecialAttack);
-        // Obtener el TextView del puntaje
         TextView scoreTextView = rootView.findViewById(R.id.scoreTextView);
-        TextView healthTextView = rootView.findViewById(R.id.healthTextView); // TextView para la vida
+        TextView healthTextView = rootView.findViewById(R.id.healthTextView);
+
         scoreManager = new ScoreManager(requireContext(), scoreTextView);
         enemyManager = new EnemyManager(requireContext(), screenWidth, screenHeight);
-
-        // Create and initialize SamuraiController
-        samuraiController = new SamuraiController(
-                requireContext(),
-                samuraiAnimation,
-                enemyManager,
-                screenWidth,
-                screenHeight
-        );
-        samuraiController.setupControls(btnLeft, btnRight, btnAttack, btnSpecialAttack, rootView);
-        handleBackButton();
-        pauseButton.setOnClickListener(v -> togglePause());
-        // Crear y agregar CustomView para dibujar enemigos
-        enemies = enemyManager.getEnemies();
-        Samurai samurai = samuraiController.getSamurai();
-        CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai,samuraiController, scoreManager, this);
-        ((ViewGroup) rootView).addView(customView);
+        samuraiController = new SamuraiController(requireContext(), samuraiAnimation, enemyManager, screenWidth, screenHeight);
 
         enemyManager.spawnEnemies();
-        // Actualizar la vida del samurái en la interfaz de usuario
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                healthTextView.setText("Vida: " + samurai.getHealth());
-                if (!samurai.isDead()) {
-                    new Handler(Looper.getMainLooper()).postDelayed(this, 100); // Actualizar cada 100ms
-                }
-            }
-        }, 100);
+        samuraiController.setupControls(outerCircle, innerCircle, btnAttack, btnSpecialAttack, rootView);
+        handleBackButton();
+        pauseButton.setOnClickListener(v -> togglePause());
 
+        enemies = enemyManager.getEnemies();
+        Samurai samurai = samuraiController.getSamurai();
+        CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
+        ((ViewGroup) rootView).addView(customView);
+
+        updateHealthTextView(healthTextView, samurai);
 
         return rootView;
     }
 
-    // Método para terminar el juego
-    public void endGame() {
-        isGameRunning = false; // Detener el bucle del juego
-        if (scoreManager != null) {
-            scoreManager.saveHighScore(); // Guardar el high score
-        }
+    private void updateHealthTextView(TextView healthTextView, Samurai samurai) {
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                healthTextView.setText(getString(R.string.health_text, samurai.getHealth()));
+                if (!samurai.isDead()) {
+                    new Handler(Looper.getMainLooper()).postDelayed(this, 100);
+                }
+            }
+        }, 100);
+    }
 
-        // Cambiar al menú principal
-        MenuFragment menuFragment = new MenuFragment();
+    public void endGame() {
+        isGameRunning = false;
+        if (scoreManager != null) {
+            scoreManager.saveHighScore();
+        }
         getParentFragmentManager().beginTransaction()
-                .replace(R.id.frame, menuFragment)
+                .replace(R.id.frame, new MenuFragment())
                 .addToBackStack(null)
                 .commit();
     }
 
     private void handleBackButton() {
-        // Registrar un callback para manejar el botón Atrás
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                endGame(); // Terminar el juego y guardar el high score
+                endGame();
             }
         });
     }
 
-    // Método para pausar o reanudar el juego
     private void togglePause() {
-        isGamePaused = !isGamePaused; // Cambiar el estado de pausa
-
+        isGamePaused = !isGamePaused;
         if (samuraiController != null) {
             samuraiController.setGamePaused(isGamePaused);
         }
-
         if (enemyManager != null) {
             enemyManager.setGamePaused(isGamePaused);
         }
-
         if (isGamePaused) {
-            showPauseMenu(); // Mostrar el menú de pausa
+            showPauseMenu();
         }
     }
 
@@ -140,17 +122,15 @@ public class GameFragment extends Fragment {
                 .setMessage("¿Qué deseas hacer?")
                 .setPositiveButton("Reanudar", (dialog, which) -> togglePause())
                 .setNegativeButton("Menú principal", (dialog, which) -> endGame())
-                .setCancelable(false) // Evitar que el usuario cierre el diálogo sin seleccionar una opción
+                .setCancelable(false)
                 .show();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Guardar el high score cuando el juego termine
         if (scoreManager != null) {
             scoreManager.saveHighScore();
         }
     }
-
 }

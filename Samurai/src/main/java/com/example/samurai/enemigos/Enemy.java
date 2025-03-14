@@ -1,36 +1,35 @@
 package com.example.samurai.enemigos;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
+
 import com.example.samurai.SpriteSheetAnimation;
 import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
 public class Enemy {
-    private SpriteSheetAnimation runAnimation, attackAnimation, currentAnimation, hitAnimation, deathAnimation;
-    private int x, y;
-    private int width, height;
-    private int speed;
-    private boolean isFlipped;
-    private boolean shouldBeRemoved = false;
-    private boolean isDead = false;
+    private final SpriteSheetAnimation runAnimation;
+    private final SpriteSheetAnimation attackAnimation;
+    private SpriteSheetAnimation currentAnimation;
+    private final SpriteSheetAnimation hitAnimation;
+    private final SpriteSheetAnimation deathAnimation;
+    private int x;
+    private final int y;
+    private final int width;
+    private final int height;
+    private final int speed;
     private int health;
-    private String type;
+    private boolean isFlipped, shouldBeRemoved = false, isDead = false;
+    private final String type;
 
     public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet,
                  int hitSpriteSheet, int deathSpriteSheet, int speed, boolean spawnFromLeft, int health, String type) {
-        Bitmap runSheet = BitmapFactory.decodeResource(context.getResources(), runSpriteSheet);
-        Bitmap attackSheet = BitmapFactory.decodeResource(context.getResources(), attackSpriteSheet);
-        Bitmap hitSheet = BitmapFactory.decodeResource(context.getResources(), hitSpriteSheet);
-        Bitmap deathSheet = BitmapFactory.decodeResource(context.getResources(), deathSpriteSheet);
-
-        runAnimation = new SpriteSheetAnimation(runSheet, 8, 10);
-        attackAnimation = new SpriteSheetAnimation(attackSheet, 8, 10);
-        hitAnimation = new SpriteSheetAnimation(hitSheet, 4, 10);
-        deathAnimation = new SpriteSheetAnimation(deathSheet, 4, 10);
+        runAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), runSpriteSheet), 8, 10);
+        attackAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), attackSpriteSheet), 8, 10);
+        hitAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), hitSpriteSheet), 4, 10);
+        deathAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), deathSpriteSheet), 4, 10);
 
         this.health = health;
         this.type = type;
@@ -52,13 +51,13 @@ public class Enemy {
 
     public void takeDamage(int damage, SamuraiController samuraiController) {
         if (!isDead) {
-            this.health -= damage;
+            health -= damage;
             currentAnimation = hitAnimation;
             currentAnimation.reset();
 
             if (health <= 0) {
                 die();
-                samuraiController.incrementEnemiesDefeated(); // Notificar al SamuraiController
+                samuraiController.incrementEnemiesDefeated();
             }
         }
     }
@@ -87,10 +86,9 @@ public class Enemy {
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
-        int minimumDistance = 100; // Distancia mínima para atacar
+        int minimumDistance = 100;
 
         if (distanceToSamurai > minimumDistance) {
-            // Si el enemigo está en attackAnimation pero el jugador ya se alejó, cambiar a runAnimation
             if (currentAnimation == attackAnimation) {
                 currentAnimation = runAnimation;
             }
@@ -103,7 +101,6 @@ public class Enemy {
                 isFlipped = true;
             }
         } else {
-            // Cambiar a la animación de ataque si no está atacando
             if (currentAnimation != attackAnimation) {
                 currentAnimation = attackAnimation;
                 currentAnimation.reset();
@@ -112,15 +109,13 @@ public class Enemy {
             if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
                 if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
                     samurai.takeDamage(samuraiController);
-                    currentAnimation = runAnimation;  // Asegurar que después de atacar vuelva a correr
+                    currentAnimation = runAnimation;
                 }
             }
         }
 
         currentAnimation.update();
     }
-
-
 
     public void die() {
         isDead = true;

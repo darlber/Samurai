@@ -20,5 +20,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Samurai"
-include(":app")
+include(":Samurai")
  
