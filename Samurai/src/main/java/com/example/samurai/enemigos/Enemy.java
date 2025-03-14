@@ -5,27 +5,39 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 
+import com.example.samurai.GameFragment;
+import com.example.samurai.R;
 import com.example.samurai.SpriteSheetAnimation;
 import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
 public class Enemy {
-    private final SpriteSheetAnimation runAnimation;
-    private final SpriteSheetAnimation attackAnimation;
+    private SpriteSheetAnimation runAnimation;
+    private SpriteSheetAnimation attackAnimation;
     private SpriteSheetAnimation currentAnimation;
-    private final SpriteSheetAnimation hitAnimation;
-    private final SpriteSheetAnimation deathAnimation;
+    private SpriteSheetAnimation hitAnimation;
+    private SpriteSheetAnimation deathAnimation;
     private int x;
-    private final int y;
-    private final int width;
-    private final int height;
-    private final int speed;
+    private int y;
+    private int width;
+    private int height;
+    private int speed;
     private int health;
     private boolean isFlipped, shouldBeRemoved = false, isDead = false;
-    private final String type;
+    private String type;
+    private final Context context;
+    private final int screenWidth;
+    private final int screenHeight;
 
     public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet,
                  int hitSpriteSheet, int deathSpriteSheet, int speed, boolean spawnFromLeft, int health, String type) {
+        this.context = context;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
+        initialize(runSpriteSheet, attackSpriteSheet, hitSpriteSheet, deathSpriteSheet, speed, spawnFromLeft, health, type);
+    }
+
+    private void initialize(int runSpriteSheet, int attackSpriteSheet, int hitSpriteSheet, int deathSpriteSheet, int speed, boolean spawnFromLeft, int health, String type) {
         runAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), runSpriteSheet), 8, 10);
         attackAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), attackSpriteSheet), 8, 10);
         hitAnimation = new SpriteSheetAnimation(BitmapFactory.decodeResource(context.getResources(), hitSpriteSheet), 4, 10);
@@ -43,6 +55,22 @@ public class Enemy {
 
         this.speed = speed;
         this.isFlipped = !spawnFromLeft;
+    }
+
+    public void reset(int enemyType, boolean spawnFromLeft) {
+        switch (enemyType) {
+            case 1:
+                initialize(R.drawable.flying_eye_run, R.drawable.flying_eye_attack, R.drawable.flying_eye_hit, R.drawable.flying_eye_death, 3, spawnFromLeft, 1, "flying_eye");
+                break;
+            case 2:
+                initialize(R.drawable.mushroom_run, R.drawable.mushroom_attack, R.drawable.mushroom_hit, R.drawable.mushroom_death, 1, spawnFromLeft, 5, "mushroom");
+                break;
+            default:
+                initialize(R.drawable.goblin_run, R.drawable.goblin_attack, R.drawable.goblin_hit, R.drawable.goblin_death, 2, spawnFromLeft, 3, "goblin");
+                break;
+        }
+        shouldBeRemoved = false;
+        isDead = false;
     }
 
     public boolean checkCollision(int samuraiX, int samuraiY, int samuraiWidth, int samuraiHeight) {
@@ -66,7 +94,7 @@ public class Enemy {
         return shouldBeRemoved;
     }
 
-    public void update(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController) {
+    public void update(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController, GameFragment gameFragment) {
         if (isDead) {
             currentAnimation.update();
             if (currentAnimation == deathAnimation && currentAnimation.getCurrentFrame() == deathAnimation.getFrameCount() - 1) {
@@ -108,7 +136,7 @@ public class Enemy {
 
             if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
                 if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
-                    samurai.takeDamage(samuraiController);
+                    samurai.takeDamage(samuraiController, gameFragment);
                     currentAnimation = runAnimation;
                 }
             }

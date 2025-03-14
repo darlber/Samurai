@@ -56,32 +56,31 @@ public class GameFragment extends Fragment {
         enemyManager = new EnemyManager(requireContext(), screenWidth, screenHeight);
         samuraiController = new SamuraiController(requireContext(), samuraiAnimation, enemyManager, screenWidth, screenHeight);
 
-        enemyManager.spawnEnemies();
+        enemyManager.spawnEnemy();
+        outerCircle.post(() -> {
+            outerCircle.bringToFront();
+            innerCircle.bringToFront();
+        });
+
         samuraiController.setupControls(outerCircle, innerCircle, btnAttack, btnSpecialAttack, rootView);
         handleBackButton();
         pauseButton.setOnClickListener(v -> togglePause());
 
         enemies = enemyManager.getEnemies();
         Samurai samurai = samuraiController.getSamurai();
+
         CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
-        ((ViewGroup) rootView).addView(customView);
+        ((ViewGroup) rootView).addView(customView, 0);
 
         updateHealthTextView(healthTextView, samurai);
 
         return rootView;
     }
 
-    private void updateHealthTextView(TextView healthTextView, Samurai samurai) {
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                healthTextView.setText(getString(R.string.health_text, samurai.getHealth()));
-                if (!samurai.isDead()) {
-                    new Handler(Looper.getMainLooper()).postDelayed(this, 100);
-                }
-            }
-        }, 100);
+    public void updateHealthTextView(TextView healthTextView, Samurai samurai) {
+        healthTextView.setText(getString(R.string.health_text, samurai.getHealth()));
     }
+
 
     public void endGame() {
         isGameRunning = false;
@@ -98,7 +97,7 @@ public class GameFragment extends Fragment {
         requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
-                endGame();
+                togglePause();
             }
         });
     }

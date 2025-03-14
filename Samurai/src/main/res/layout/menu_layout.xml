@@ -14,15 +14,22 @@
         android:contentDescription="Botón de play" />
 
     <!-- TextView para mostrar el high score -->
+
     <TextView
         android:id="@+id/highScoreTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@id/playButton"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="20dp"
-        android:background="@color/black"
-        android:text="High Score: 0"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF" />
+        android:layout_margin="16dp"
+        android:layout_marginTop="26dp"
+        android:layout_marginBottom="16dp"
+        android:shadowColor="#000000"
+        android:shadowDx="5.5"
+        android:shadowDy="5.5"
+        android:shadowRadius="1"
+        android:textColor="#FFFFFF"
+        android:padding="4dp"
+        android:text="@string/score"
+        android:textSize="24sp" />
+
 </RelativeLayout>

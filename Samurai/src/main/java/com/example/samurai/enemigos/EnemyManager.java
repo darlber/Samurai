@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.example.samurai.GameFragment;
 import com.example.samurai.R;
 import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
@@ -15,6 +16,7 @@ import java.util.Random;
 
 public class EnemyManager {
     private final List<Enemy> enemies = new ArrayList<>();
+    private final List<Enemy> enemyPool = new ArrayList<>();
     private final Handler enemyHandler = new Handler(Looper.getMainLooper());
     private final Random random = new Random();
     private final Context context;
@@ -29,20 +31,36 @@ public class EnemyManager {
         this.screenWidth = screenWidth;
         this.screenHeight = screenHeight;
         increaseDifficultyOverTime();
+        startSpawningEnemies();
     }
 
-    public void spawnEnemies() {
-        enemyHandler.postDelayed(() -> {
-            if (enemies.size() < maxEnemies) {
-                int enemyType = random.nextInt(3);
-                boolean spawnFromLeft = random.nextBoolean();
-                Enemy enemy = createEnemy(enemyType, spawnFromLeft);
-                enemies.add(enemy);
+    private void startSpawningEnemies() {
+        enemyHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (!isGamePaused && enemies.size() < maxEnemies) {
+                    spawnEnemy();
+                }
+                enemyHandler.postDelayed(this, spawnInterval);
             }
-            enemyHandler.postDelayed(this::spawnEnemies, random.nextInt(spawnInterval) + 1000);
-        }, 1000);
+        }, spawnInterval);
     }
 
+    public void spawnEnemy() {
+        int enemyType = random.nextInt(3);
+        boolean spawnFromLeft = random.nextBoolean();
+        Enemy enemy = getEnemyFromPool(enemyType, spawnFromLeft);
+        enemies.add(enemy);
+    }
+
+    private Enemy getEnemyFromPool(int enemyType, boolean spawnFromLeft) {
+        if (!enemyPool.isEmpty()) {
+            Enemy enemy = enemyPool.remove(enemyPool.size() - 1);
+            enemy.reset(enemyType, spawnFromLeft);
+            return enemy;
+        }
+        return createEnemy(enemyType, spawnFromLeft);
+    }
 
     private Enemy createEnemy(int enemyType, boolean spawnFromLeft) {
         int[] drawables;
@@ -73,23 +91,29 @@ public class EnemyManager {
         return new Enemy(context, screenWidth, screenHeight, drawables[0], drawables[1], drawables[2], drawables[3], speed, spawnFromLeft, health, type);
     }
 
-    private void increaseDifficultyOverTime() {
-        enemyHandler.postDelayed(() -> {
+
+private void increaseDifficultyOverTime() {
+    enemyHandler.postDelayed(new Runnable() {
+        @Override
+        public void run() {
             if (maxEnemies < 50) maxEnemies++;
             if (spawnInterval > 1000) spawnInterval -= 500;
-            enemyHandler.postDelayed(this::increaseDifficultyOverTime, 15000);
-        }, 15000);
-    }
+            enemyHandler.postDelayed(this, 15000);
+        }
+    }, 15000);
+}
 
-    public void updateEnemies(int samuraiX, int samuraiWidth, Samurai samurai, SamuraiController samuraiController) {
+    public void updateEnemies(int samuraiX, int samuraiWidth, Samurai samurai,
+                              SamuraiController samuraiController, GameFragment gameFragment) {
         if (isGamePaused) return;
         Iterator<Enemy> iterator = enemies.iterator();
         while (iterator.hasNext()) {
             Enemy enemy = iterator.next();
             if (enemy.isMarkedForRemoval()) {
                 iterator.remove();
+                enemyPool.add(enemy);
             } else {
-                enemy.update(samuraiX, samuraiWidth, samurai, samuraiController);
+                enemy.update(samuraiX, samuraiWidth, samurai, samuraiController, gameFragment);
             }
         }
     }

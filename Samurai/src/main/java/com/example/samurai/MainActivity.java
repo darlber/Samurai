@@ -5,12 +5,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends FragmentActivity {
 
+//TODO pantalla principal
+//TODO pantalla de game over
+//TODO usar onStop y onStart para pausar el juego, onDestroy para liberar recursos,
+//  onRestart para reanudar el juego, onPause y onResume para pausar y reanudar la música
+//TODO musica
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +34,7 @@ public class MainActivity extends FragmentActivity {
             }
         } else {
             getWindow().getDecorView().setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             );
         }
     }

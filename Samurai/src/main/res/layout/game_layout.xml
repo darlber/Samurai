@@ -9,24 +9,40 @@
         android:id="@+id/scoreTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
+        android:shadowColor="#000000"
+        android:shadowDx="-3.5"
+        android:shadowDy="5.5"
+        android:shadowRadius="1"
+        android:textColor="#FFFFFF"
+        android:layout_alignParentTop="true"
         android:layout_margin="16dp"
         android:text="@string/score"
-        android:background="@color/black"
         android:textSize="24sp"
-        android:textColor="#FFFFFF" />
+        android:padding="4dp"
+
+        />
+
     <TextView
         android:id="@+id/healthTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_toEndOf="@id/scoreTextView"
         android:layout_margin="16dp"
-        android:text="Vida: 3"
-        android:background="@color/black"
-        android:textSize="24sp"
-        android:textColor="#FFFFFF" />
+        android:layout_marginStart="134dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_toEndOf="@id/scoreTextView"
+        android:padding="4dp"
+        android:text="@string/health_text"
+        android:shadowColor="#000000"
+        android:shadowDx="-3.5"
+        android:shadowDy="5.5"
+        android:shadowRadius="1"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+
     <ImageView
         android:id="@+id/pauseButton"
         android:layout_width="46dp"
@@ -77,8 +93,9 @@
 
     <Button
         android:id="@+id/btnSpecialAttack"
-        android:layout_width="148dp"
-        android:layout_height="129dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_above="@id/btnAttack"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
@@ -86,13 +103,12 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
-        android:layout_above="@id/btnAttack"
-        android:text="Ataque Especial" />
+        android:background="@drawable/attack_special" />
 
     <Button
         android:id="@+id/btnAttack"
-        android:layout_width="148dp"
-        android:layout_height="129dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentBottom="true"
         android:layout_marginStart="16dp"
@@ -101,6 +117,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
+        android:background="@drawable/attack"
         android:text="Atacar" />
 
 

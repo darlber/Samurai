@@ -5,9 +5,13 @@ package com.example.samurai.jugador;
     import android.content.Context;
     import android.util.Log;
     import androidx.core.content.res.ResourcesCompat;
+
+    import com.example.samurai.GameFragment;
     import com.example.samurai.R;
 
-    public class Samurai {
+    import java.util.Objects;
+
+public class Samurai {
         private AnimationDrawable idleAnimation, runAnimation, attackAnimation, hurtAnimation, dashAnimation;
         private int x, y, width, height, health;
         private boolean isInvulnerable = false;
@@ -41,10 +45,16 @@ package com.example.samurai.jugador;
             return health;
         }
 
-        public void takeDamage(SamuraiController samuraiController) {
+        public void takeDamage(SamuraiController samuraiController, GameFragment gameFragment) {
+            this.health--;
             if (!isInvulnerable() && !isDead()) {
                 Log.d("Samurai", "Vida restante: " + health);
                 samuraiController.startHurtAnimation();
+
+                // Llama a la función del GameFragment para actualizar la vida en la UI
+                if (gameFragment != null) {
+                    gameFragment.updateHealthTextView(gameFragment.requireView().findViewById(R.id.healthTextView), this);
+                }
             }
         }
 

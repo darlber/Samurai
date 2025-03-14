@@ -43,7 +43,7 @@ public class CustomView extends View {
         int samuraiWidth = samurai.getWidth();
 
         // Actualizar la posición de los enemigos en función del samurái
-        enemyManager.updateEnemies(samuraiX, samuraiWidth, samurai, samuraiController);
+        enemyManager.updateEnemies(samuraiX, samuraiWidth, samurai, samuraiController, gameFragment);
 
         // Dibujar todos los enemigos
         for (int i = 0; i < enemies.size(); i++) {
