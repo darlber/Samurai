@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import com.example.samurai.enemigos.Enemy;
 import com.example.samurai.enemigos.EnemyManager;
 import com.example.samurai.jugador.Samurai;
@@ -13,19 +15,18 @@ import com.example.samurai.jugador.SamuraiController;
 import java.util.List;
 
 public class CustomView extends View {
-    private int screenWidth, screenHeight;
-    private List<Enemy> enemies;
-    private Samurai samurai;
-    private ScoreManager scoreManager;
-    private EnemyManager enemyManager;
-    private GameFragment gameFragment;
-    private SamuraiController samuraiController;
+    private final int screenWidth;
+    private final List<Enemy> enemies;
+    private final Samurai samurai;
+    private final ScoreManager scoreManager;
+    private final EnemyManager enemyManager;
+    private final GameFragment gameFragment;
+    private final SamuraiController samuraiController;
 
     public CustomView(Context context, int screenWidth, int screenHeight, List<Enemy> enemies,
                       EnemyManager enemyManager, Samurai samurai, SamuraiController samuraiController, ScoreManager scoreManager, GameFragment gameFragment) {
         super(context);
         this.screenWidth = screenWidth;
-        this.screenHeight = screenHeight;
         this.enemies = enemies;
         this.samurai = samurai;
         this.samuraiController = samuraiController;
@@ -35,7 +36,7 @@ public class CustomView extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         // Obtener la posición del samurái

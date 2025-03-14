@@ -103,6 +103,7 @@ public class Enemy {
             return;
         }
 
+        // Solo actualiza animaciones si realmente hubo un cambio
         if (currentAnimation == hitAnimation) {
             currentAnimation.update();
             if (currentAnimation.getCurrentFrame() == hitAnimation.getFrameCount() - 1) {
@@ -111,16 +112,33 @@ public class Enemy {
             return;
         }
 
+        // Calcular la distancia entre el enemigo y el samurai
         int enemyCenterX = x + (width / 2);
         int samuraiCenterX = samuraiX + (samuraiWidth / 2);
         int distanceToSamurai = Math.abs(enemyCenterX - samuraiCenterX);
-        int minimumDistance = 100;
+        int minimumDistance = 100; // Este es el rango de detección
 
-        if (distanceToSamurai > minimumDistance) {
-            if (currentAnimation == attackAnimation) {
-                currentAnimation = runAnimation;
+        // Solo realizar la verificación de colisión si el enemigo está dentro del rango de proximidad
+        if (distanceToSamurai <= minimumDistance) {
+            if (currentAnimation != attackAnimation) {
+                currentAnimation = attackAnimation;
+                currentAnimation.reset();
             }
 
+            // Verificar colisión si el enemigo está atacando
+            if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
+                if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
+                    samurai.takeDamage(samuraiController, gameFragment);
+                    currentAnimation = runAnimation; // Volver a la animación de correr
+                }
+            }
+        } else {
+            // Movimiento del enemigo solo si está fuera del rango de ataque
+            if (currentAnimation == attackAnimation) {
+                currentAnimation = runAnimation; // Volver a la animación de correr
+            }
+
+            // Moverse hacia el samurai si está lo suficientemente cerca
             if (enemyCenterX < samuraiCenterX) {
                 x += speed;
                 isFlipped = false;
@@ -128,20 +146,9 @@ public class Enemy {
                 x -= speed;
                 isFlipped = true;
             }
-        } else {
-            if (currentAnimation != attackAnimation) {
-                currentAnimation = attackAnimation;
-                currentAnimation.reset();
-            }
-
-            if (currentAnimation == attackAnimation && currentAnimation.getCurrentFrame() == attackAnimation.getFrameCount() - 1) {
-                if (checkCollision(samuraiX, samurai.getY(), samuraiWidth, samurai.getHeight())) {
-                    samurai.takeDamage(samuraiController, gameFragment);
-                    currentAnimation = runAnimation;
-                }
-            }
         }
 
+        // Actualizar la animación
         currentAnimation.update();
     }
 
