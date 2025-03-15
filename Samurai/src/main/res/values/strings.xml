@@ -1,9 +1,15 @@
 <resources>
     <string name="app_name">Samurai</string>
-    <string name="score_text">Puntaje: %1$d | High Score: %2$d</string>
+    <string name="score_text">Score: %1$d | High Score: %2$d</string>
     <string name="high_score">High Score: %1$d</string>
     <string name="ready">Ready</string>
     <string name="health_text">Vida: %1$d</string>
     <string name="remaining">Ataque Especial (%1$d)</string>
     <string name="vida">"Vida: "</string>
+    <string name="game_over_message">Puntuación: %1$d\nEnemigos derrotados: %2$d</string>
+    <string name="bot_n_de_play">Botón de play</string>
+    <string name="reintentar">Reintentar</string>
+    <string name="volver_al_men_principal">Volver al menú principal</string>
+    <string name="game_over">Game Over</string>
+    <string name="atacar">Atacar</string>
 </resources>

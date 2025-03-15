@@ -69,7 +69,7 @@ public class GameFragment extends Fragment {
         List<Enemy> enemies = enemyManager.getEnemies();
         Samurai samurai = samuraiController.getSamurai();
 
-        CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
+        CustomView customView = new CustomView(requireContext(), screenWidth, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
         ((ViewGroup) rootView).addView(customView, 0);
 
         updateHealthTextView(samurai);
@@ -137,7 +137,7 @@ public class GameFragment extends Fragment {
         Button btnMainMenu = dialogView.findViewById(R.id.btn_main_menu);
         Button btnRetry = dialogView.findViewById(R.id.btn_retry);
 
-        message.setText("Puntuación: " + score + "\nEnemigos derrotados: " + enemiesDefeated);
+        message.setText(getString(R.string.game_over_message, score, enemiesDefeated));
 
         // Reproducir música de Game Over
         MusicManager.release();

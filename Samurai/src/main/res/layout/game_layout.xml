@@ -132,7 +132,9 @@
         android:layout_marginEnd="16dp"
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
-        android:background="@drawable/attack_special" />
+        android:background="@drawable/attack_special"
+        android:textColor="#80FFFFFF"
+        />
 
     <Button
         android:id="@+id/btnAttack"
@@ -147,7 +149,8 @@
         android:layout_marginRight="16dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/attack"
-        android:text="Atacar" />
+        android:text="@string/atacar"
+        android:textColor="#FFFFFF"/>
 
 
 </RelativeLayout>

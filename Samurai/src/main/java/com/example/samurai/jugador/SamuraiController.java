@@ -13,9 +13,10 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
 
 import com.example.samurai.R;
 import com.example.samurai.SoundManager;
@@ -192,7 +193,11 @@ public class SamuraiController {
         int remainingEnemies = 10 - enemiesDefeated;
         if (remainingEnemies <= 0) {
             btnSpecialAttack.setText(R.string.ready);
+            btnSpecialAttack.setTextColor(Color.WHITE);
+
         } else {
+            btnSpecialAttack.setEnabled(false);
+            btnSpecialAttack.setTextColor(Color.argb(128, 255, 255, 255)); // Color gris transparente
             btnSpecialAttack.setText(context.getString(R.string.remaining, remainingEnemies));
         }
     }
@@ -221,6 +226,13 @@ public class SamuraiController {
         rootView.addView(blackOverlay, 0); // Índice 0 para colocarla detrás de todo
 
         // Animación de "fade to black"
+        Animation fadeToBlack = getAnimation(blackOverlay);
+
+        blackOverlay.startAnimation(fadeToBlack);
+    }
+
+    @NonNull
+    private Animation getAnimation(View blackOverlay) {
         Animation fadeToBlack = new AlphaAnimation(0.0f, 1.0f);
         fadeToBlack.setDuration(500); // Duración de 500ms
         fadeToBlack.setFillAfter(true);
@@ -238,8 +250,7 @@ public class SamuraiController {
             @Override
             public void onAnimationRepeat(Animation animation) {}
         });
-
-        blackOverlay.startAnimation(fadeToBlack);
+        return fadeToBlack;
     }
 
     private void performSpecialAttackAnimation(View blackOverlay) {

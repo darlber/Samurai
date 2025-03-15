@@ -3,6 +3,7 @@ package com.example.samurai;
 import android.content.Context;
 import android.graphics.Canvas;
 
+import android.util.AttributeSet;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -23,8 +24,42 @@ public class CustomView extends View {
     private final GameFragment gameFragment;
     private final SamuraiController samuraiController;
 
-    public CustomView(Context context, int screenWidth, int screenHeight, List<Enemy> enemies,
-                      EnemyManager enemyManager, Samurai samurai, SamuraiController samuraiController, ScoreManager scoreManager, GameFragment gameFragment) {
+    public CustomView(Context context) {
+        super(context);
+        this.screenWidth = 0;
+        this.enemies = null;
+        this.samurai = null;
+        this.samuraiController = null;
+        this.enemyManager = null;
+        this.scoreManager = null;
+        this.gameFragment = null;
+    }
+
+    public CustomView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        this.screenWidth = 0;
+        this.enemies = null;
+        this.samurai = null;
+        this.samuraiController = null;
+        this.enemyManager = null;
+        this.scoreManager = null;
+        this.gameFragment = null;
+    }
+
+    public CustomView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        this.screenWidth = 0;
+        this.enemies = null;
+        this.samurai = null;
+        this.samuraiController = null;
+        this.enemyManager = null;
+        this.scoreManager = null;
+        this.gameFragment = null;
+    }
+
+    public CustomView(Context context, int screenWidth, List<Enemy> enemies,
+                      EnemyManager enemyManager, Samurai samurai, SamuraiController samuraiController,
+                      ScoreManager scoreManager, GameFragment gameFragment) {
         super(context);
         this.screenWidth = screenWidth;
         this.enemies = enemies;
