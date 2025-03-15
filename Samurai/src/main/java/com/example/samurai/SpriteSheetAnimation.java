@@ -7,12 +7,12 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 
 public class SpriteSheetAnimation {
-    private Bitmap spriteSheet; // La imagen que contiene todos los frames
-    private int frameWidth;     // Ancho de cada frame
-    private int frameHeight;    // Alto de cada frame
-    private int frameCount;     // Número total de frames
+    private final Bitmap spriteSheet; // La imagen que contiene todos los frames
+    private final int frameWidth;     // Ancho de cada frame
+    private final int frameHeight;    // Alto de cada frame
+    private final int frameCount;     // Número total de frames
     private int currentFrame;   // Frame actual
-    private long frameTime;     // Tiempo entre frames
+    private final long frameTime;     // Tiempo entre frames
     private long lastFrameTime; // Último tiempo de actualización
 
     public SpriteSheetAnimation(Bitmap spriteSheet, int frameCount, int fps) {

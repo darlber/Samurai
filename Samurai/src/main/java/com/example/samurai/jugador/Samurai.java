@@ -1,19 +1,22 @@
 package com.example.samurai.jugador;
 
+import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
-import android.content.Context;
 import android.util.Log;
+
 import androidx.core.content.res.ResourcesCompat;
 
 import com.example.samurai.GameFragment;
 import com.example.samurai.R;
 
-import java.util.Objects;
-
 public class Samurai {
-    private AnimationDrawable idleAnimation, runAnimation, attackAnimation, hurtAnimation, dashAnimation;
-    private int x, y, width, height, health;
+    private final AnimationDrawable idleAnimation, runAnimation, attackAnimation, hurtAnimation, dashAnimation;
+    private int x;
+    private int y;
+    private final int width;
+    private final int height;
+    private int health;
     private boolean isInvulnerable = false;
 
     public Samurai(Context context, int screenWidth, int screenHeight) {
@@ -52,6 +55,11 @@ public class Samurai {
 
             if (gameFragment != null) {
                 gameFragment.updateHealthTextView(this);
+
+                // Verificar si el samurái ha muerto después de recibir daño
+                if (isDead()) {
+                    gameFragment.showGameOverDialog();
+                }
             }
         }
     }

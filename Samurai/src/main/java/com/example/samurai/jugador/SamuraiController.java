@@ -26,6 +26,7 @@ public class SamuraiController {
     private final EnemyManager enemyManager;
     private final Context context;
     private int enemiesDefeated = 0;
+    private int totalEnemiesDefeated = 0;
     private Button btnSpecialAttack;
     private static final int ATTACK_COOLDOWN = 150;
     private final GestureDetector gestureDetector;
@@ -191,6 +192,7 @@ public class SamuraiController {
 
     public void incrementEnemiesDefeated() {
         enemiesDefeated++;
+        this.totalEnemiesDefeated++;
         updateSpecialAttackButton();
         updateSpecialAttackButtonText();
     }
@@ -215,6 +217,10 @@ public class SamuraiController {
         AnimationDrawable animation = (AnimationDrawable) samuraiAnimation.getBackground();
         samuraiAnimation.setVisibility(View.VISIBLE);
         animation.start();
+    }
+
+    public int getEnemiesDefeated() {
+        return totalEnemiesDefeated;
     }
 
     private void moveSamurai() {

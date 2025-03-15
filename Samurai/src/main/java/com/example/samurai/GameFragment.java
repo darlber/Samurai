@@ -2,8 +2,6 @@ package com.example.samurai;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +20,12 @@ import com.example.samurai.enemigos.EnemyManager;
 import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class GameFragment extends Fragment {
     private SamuraiController samuraiController;
     private EnemyManager enemyManager;
     private ScoreManager scoreManager;
-    private ImageView samuraiAnimation;
-    private List<Enemy> enemies = new ArrayList<>();
-    private boolean isGameRunning = true;
     private boolean isGamePaused = false;
     private View innerCircle, outerCircle;
     private ImageView health1, health2, health3, health4, health5;
@@ -44,7 +38,7 @@ public class GameFragment extends Fragment {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int screenHeight = getResources().getDisplayMetrics().heightPixels;
 
-        samuraiAnimation = rootView.findViewById(R.id.samuraiAnimation);
+        ImageView samuraiAnimation = rootView.findViewById(R.id.samuraiAnimation);
         outerCircle = rootView.findViewById(R.id.outerCircle);
         innerCircle = rootView.findViewById(R.id.innerCircle);
         Button btnAttack = rootView.findViewById(R.id.btnAttack);
@@ -72,7 +66,7 @@ public class GameFragment extends Fragment {
         handleBackButton();
         pauseButton.setOnClickListener(v -> togglePause());
 
-        enemies = enemyManager.getEnemies();
+        List<Enemy> enemies = enemyManager.getEnemies();
         Samurai samurai = samuraiController.getSamurai();
 
         CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
@@ -95,14 +89,9 @@ public class GameFragment extends Fragment {
 
 
     public void endGame() {
-        isGameRunning = false;
         if (scoreManager != null) {
             scoreManager.saveHighScore();
         }
-        getParentFragmentManager().beginTransaction()
-                .replace(R.id.frame, new MenuFragment())
-                .addToBackStack(null)
-                .commit();
     }
 
     private void handleBackButton() {
@@ -137,6 +126,43 @@ public class GameFragment extends Fragment {
                 .show();
     }
 
+    public void showGameOverDialog() {
+        LayoutInflater inflater = getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.game_over, null);
+
+        int score = scoreManager.getScore();
+        int enemiesDefeated = samuraiController.getEnemiesDefeated();
+
+        TextView title = dialogView.findViewById(R.id.title);
+        TextView message = dialogView.findViewById(R.id.message);
+        Button btnMainMenu = dialogView.findViewById(R.id.btn_main_menu);
+        Button btnRetry = dialogView.findViewById(R.id.btn_retry);
+
+        message.setText("Puntuación: " + score + "\nEnemigos derrotados: " + enemiesDefeated);
+
+        AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
+                .setView(dialogView)
+                .setCancelable(false)
+                .create();
+
+        btnMainMenu.setOnClickListener(v -> {
+            // Volver al menú principal
+            alertDialog.dismiss();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.frame, new MenuFragment())
+                    .commit();
+        });
+
+        btnRetry.setOnClickListener(v -> {
+            // Reintentar el juego
+            alertDialog.dismiss();
+            getParentFragmentManager().beginTransaction()
+                    .replace(R.id.frame, new GameFragment())
+                    .commit();
+        });
+
+        alertDialog.show();
+    }
     @Override
     public void onDestroyView() {
         super.onDestroyView();

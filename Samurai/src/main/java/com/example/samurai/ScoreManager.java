@@ -28,17 +28,23 @@ public class ScoreManager {
             saveHighScore(); // Guardamos el nuevo high score inmediatamente
         }
         updateScoreText();
-        saveScore(); // Guardamos el score normal
+        saveScore(score); // Guardamos el score normal
     }
+
 
 
     private void updateScoreText() {
         // Mostrar el puntaje actual y el high score
-        scoreTextView.setText("Score: " + score + " | High Score: " + highScore);
+        scoreTextView.setText(context.getString(R.string.score_text, score, highScore));
     }
 
-    private void saveScore() {
+    public int getScore() {
+        return score;
+    }
+
+    private void saveScore(int score) {
         // Guardar el puntaje en SharedPreferences
+        this.score = score;
         SharedPreferences preferences = context.getSharedPreferences("game_prefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("score", score);
@@ -47,11 +53,6 @@ public class ScoreManager {
 
     public int getHighScore() {
         return highScore;
-    }
-
-    public void resetScore() {
-        score = 0;
-        updateScoreText();
     }
 
     public void saveHighScore() {

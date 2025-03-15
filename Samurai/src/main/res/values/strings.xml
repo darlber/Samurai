@@ -1,8 +1,9 @@
 <resources>
     <string name="app_name">Samurai</string>
-    <string name="score">Score: </string>
+    <string name="score_text">Puntaje: %1$d | High Score: %2$d</string>
+    <string name="high_score">High Score: %1$d</string>
     <string name="ready">Ready</string>
-<string name="health_text">Vida: %1$d</string>
+    <string name="health_text">Vida: %1$d</string>
     <string name="remaining">Ataque Especial (%1$d)</string>
     <string name="vida">"Vida: "</string>
 </resources>

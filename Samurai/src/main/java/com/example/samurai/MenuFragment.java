@@ -25,7 +25,7 @@ public class MenuFragment extends Fragment {
         // Cargar el high score desde ScoreManager
         ScoreManager scoreManager = new ScoreManager(requireContext(), null); // No necesitamos el scoreTextView aquí
         int highScore = scoreManager.getHighScore();
-        highScoreTextView.setText("High Score: " + highScore);
+        highScoreTextView.setText(getString(R.string.high_score, highScore));
         // Configurar el botón de play
         ImageView playButton = rootView.findViewById(R.id.playButton);
         playButton.setOnClickListener(v -> {

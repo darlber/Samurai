@@ -78,13 +78,6 @@ public class CustomView extends View {
             }
         }
 
-        // Verificar si el samurái ha perdido toda su vida
-        if (samurai.isDead()) {
-            // Terminar el juego
-            gameFragment.endGame();
-        }
-
-        // Volver a dibujar la vista
         invalidate();
     }
 }

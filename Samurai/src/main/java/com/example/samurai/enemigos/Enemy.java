@@ -12,6 +12,9 @@ import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
 public class Enemy {
+    private final Context context;
+    private final int screenWidth;
+    private final int screenHeight;
     private SpriteSheetAnimation runAnimation;
     private SpriteSheetAnimation attackAnimation;
     private SpriteSheetAnimation currentAnimation;
@@ -25,9 +28,6 @@ public class Enemy {
     private int health;
     private boolean isFlipped, shouldBeRemoved = false, isDead = false;
     private String type;
-    private final Context context;
-    private final int screenWidth;
-    private final int screenHeight;
 
     public Enemy(Context context, int screenWidth, int screenHeight, int runSpriteSheet, int attackSpriteSheet,
                  int hitSpriteSheet, int deathSpriteSheet, int speed, boolean spawnFromLeft, int health, String type) {
