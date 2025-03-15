@@ -23,8 +23,8 @@
 
         />
 
-    <TextView
-        android:id="@+id/healthTextView"
+    <LinearLayout
+        android:id="@+id/healthLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -33,15 +33,43 @@
         android:layout_marginTop="14dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
-        android:layout_toEndOf="@id/scoreTextView"
-        android:padding="4dp"
-        android:text="@string/health_text"
-        android:shadowColor="#000000"
-        android:shadowDx="-3.5"
-        android:shadowDy="5.5"
-        android:shadowRadius="1"
-        android:textColor="#FFFFFF"
-        android:textSize="24sp" />
+        android:layout_toStartOf="@id/pauseButton"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/health1"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/health2"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/health3"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/health4"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/health5"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/heart"/>
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/pauseButton"

@@ -34,6 +34,7 @@ public class GameFragment extends Fragment {
     private boolean isGameRunning = true;
     private boolean isGamePaused = false;
     private View innerCircle, outerCircle;
+    private ImageView health1, health2, health3, health4, health5;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -50,7 +51,12 @@ public class GameFragment extends Fragment {
         ImageView pauseButton = rootView.findViewById(R.id.pauseButton);
         Button btnSpecialAttack = rootView.findViewById(R.id.btnSpecialAttack);
         TextView scoreTextView = rootView.findViewById(R.id.scoreTextView);
-        TextView healthTextView = rootView.findViewById(R.id.healthTextView);
+
+        health1 = rootView.findViewById(R.id.health1);
+        health2 = rootView.findViewById(R.id.health2);
+        health3 = rootView.findViewById(R.id.health3);
+        health4 = rootView.findViewById(R.id.health4);
+        health5 = rootView.findViewById(R.id.health5);
 
         scoreManager = new ScoreManager(requireContext(), scoreTextView);
         enemyManager = new EnemyManager(requireContext(), screenWidth, screenHeight);
@@ -72,13 +78,19 @@ public class GameFragment extends Fragment {
         CustomView customView = new CustomView(requireContext(), screenWidth, screenHeight, enemies, enemyManager, samurai, samuraiController, scoreManager, this);
         ((ViewGroup) rootView).addView(customView, 0);
 
-        updateHealthTextView(healthTextView, samurai);
+        updateHealthTextView(samurai);
 
         return rootView;
     }
 
-    public void updateHealthTextView(TextView healthTextView, Samurai samurai) {
-        healthTextView.setText(getString(R.string.health_text, samurai.getHealth()));
+    public void updateHealthTextView(Samurai samurai) {
+        int health = samurai.getHealth();
+
+        health1.setVisibility(health >= 1 ? View.VISIBLE : View.GONE);
+        health2.setVisibility(health >= 2 ? View.VISIBLE : View.GONE);
+        health3.setVisibility(health >= 3 ? View.VISIBLE : View.GONE);
+        health4.setVisibility(health >= 4 ? View.VISIBLE : View.GONE);
+        health5.setVisibility(health >= 5 ? View.VISIBLE : View.GONE);
     }
 
 
