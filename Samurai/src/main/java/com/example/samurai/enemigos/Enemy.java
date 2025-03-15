@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 
 import com.example.samurai.GameFragment;
 import com.example.samurai.R;
+import com.example.samurai.SoundManager;
 import com.example.samurai.SpriteSheetAnimation;
 import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
@@ -82,7 +83,7 @@ public class Enemy {
             health -= damage;
             currentAnimation = hitAnimation;
             currentAnimation.reset();
-
+            SoundManager.playSound(R.raw.attack_sound);
             if (health <= 0) {
                 die();
                 samuraiController.incrementEnemiesDefeated();

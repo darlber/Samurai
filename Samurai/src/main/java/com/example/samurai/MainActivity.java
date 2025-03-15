@@ -11,18 +11,22 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends FragmentActivity {
+    private GameFragment gameFragment;
 
+    public MainActivity(GameFragment gameFragment) {
+        this.gameFragment = gameFragment;
+    }
+    public MainActivity() {
+    }
 
-    //TODO animación para ataque special
-//TODO usar onStop y onStart para pausar el juego, onDestroy para liberar recursos,
-//  onRestart para reanudar el juego, onPause y onResume para pausar y reanudar la música
-//TODO musica
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setFullScreen();
         loadMenuFragment();
+        MusicManager.play(this, R.raw.music);
+        SoundManager.init(this);
     }
 
     private void setFullScreen() {
@@ -44,10 +48,45 @@ public class MainActivity extends FragmentActivity {
         FragmentTransaction ft = fm.beginTransaction();
         ft.replace(R.id.frame, new MenuFragment()).commit();
     }
-
+    protected void onStart() {
+        super.onStart();
+        if (gameFragment != null) {
+            gameFragment.togglePause();
+        }
+        // Reanudar la música
+        MusicManager.resume();
+    }
     @Override
     protected void onResume() {
         super.onResume();
         setFullScreen();
+    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        MusicManager.pause();
+
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MusicManager.release();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Pausar la música
+        MusicManager.pause();
+    }
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        // Reanudar el juego si es necesario
+        if (gameFragment != null) {
+            gameFragment.togglePause();
+        }
     }
 }

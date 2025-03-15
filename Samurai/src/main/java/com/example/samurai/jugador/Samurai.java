@@ -9,6 +9,7 @@ import androidx.core.content.res.ResourcesCompat;
 
 import com.example.samurai.GameFragment;
 import com.example.samurai.R;
+import com.example.samurai.SoundManager;
 
 public class Samurai {
     private final AnimationDrawable idleAnimation, runAnimation, attackAnimation, hurtAnimation, dashAnimation;
@@ -52,7 +53,7 @@ public class Samurai {
         if (!isInvulnerable() && !isDead()) {
             this.health--;
             samuraiController.startHurtAnimation();
-
+            SoundManager.playSound(R.raw.hurt_sound);
             if (gameFragment != null) {
                 gameFragment.updateHealthTextView(this);
 

@@ -21,6 +21,7 @@ import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
 import java.util.List;
+import java.util.Objects;
 
 public class GameFragment extends Fragment {
     private SamuraiController samuraiController;
@@ -103,7 +104,7 @@ public class GameFragment extends Fragment {
         });
     }
 
-    private void togglePause() {
+    void togglePause() {
         isGamePaused = !isGamePaused;
         if (samuraiController != null) {
             samuraiController.setGamePaused(isGamePaused);
@@ -129,33 +130,45 @@ public class GameFragment extends Fragment {
     public void showGameOverDialog() {
         LayoutInflater inflater = getLayoutInflater();
         View dialogView = inflater.inflate(R.layout.game_over, null);
-
         int score = scoreManager.getScore();
         int enemiesDefeated = samuraiController.getEnemiesDefeated();
 
-        TextView title = dialogView.findViewById(R.id.title);
+        dialogView.findViewById(R.id.title);
         TextView message = dialogView.findViewById(R.id.message);
         Button btnMainMenu = dialogView.findViewById(R.id.btn_main_menu);
         Button btnRetry = dialogView.findViewById(R.id.btn_retry);
 
         message.setText("Puntuación: " + score + "\nEnemigos derrotados: " + enemiesDefeated);
 
+        // Reproducir música de Game Over
+        MusicManager.release();
+        MusicManager.play(requireContext(), R.raw.game_over);
+        // Ocultar el samurái
+        View samuraiView = requireView().findViewById(R.id.samuraiAnimation);
+        if (samuraiView != null) {
+            samuraiView.setVisibility(View.GONE);
+        }
         AlertDialog alertDialog = new AlertDialog.Builder(requireContext())
                 .setView(dialogView)
                 .setCancelable(false)
                 .create();
 
-        btnMainMenu.setOnClickListener(v -> {
-            // Volver al menú principal
+        View.OnClickListener buttonClickListener = v -> {
+            // Reanudar música principal
+            MusicManager.release();
+            MusicManager.play(requireContext(), R.raw.music);
             alertDialog.dismiss();
+        };
+
+        btnMainMenu.setOnClickListener(v -> {
+            buttonClickListener.onClick(v);
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.frame, new MenuFragment())
                     .commit();
         });
 
         btnRetry.setOnClickListener(v -> {
-            // Reintentar el juego
-            alertDialog.dismiss();
+            buttonClickListener.onClick(v);
             getParentFragmentManager().beginTransaction()
                     .replace(R.id.frame, new GameFragment())
                     .commit();
@@ -163,6 +176,7 @@ public class GameFragment extends Fragment {
 
         alertDialog.show();
     }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.samurai.R;
+import com.example.samurai.SoundManager;
 import com.example.samurai.enemigos.Enemy;
 import com.example.samurai.enemigos.EnemyManager;
 
@@ -270,6 +271,8 @@ public class SamuraiController {
             samuraiAnimation.setScaleX(-1.5f);
         }
         samuraiAnimation.setX(samurai.getX());
+        SoundManager.playSound(R.raw.dash_sound);
+
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
             isAttacking = false;
