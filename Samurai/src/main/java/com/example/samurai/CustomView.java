@@ -77,7 +77,7 @@ public class CustomView extends View {
                 i--; // Ajustar el índice después de eliminar un enemigo
             }
         }
-
+        // Volver a dibujar la vista
         invalidate();
     }
 }

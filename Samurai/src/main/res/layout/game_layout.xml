@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:background="@drawable/background"
     android:layout_height="match_parent">
+
     <!-- TextView para mostrar los puntos -->
     <TextView
         android:id="@+id/scoreTextView"

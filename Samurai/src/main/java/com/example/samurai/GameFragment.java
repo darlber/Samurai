@@ -21,7 +21,6 @@ import com.example.samurai.jugador.Samurai;
 import com.example.samurai.jugador.SamuraiController;
 
 import java.util.List;
-import java.util.Objects;
 
 public class GameFragment extends Fragment {
     private SamuraiController samuraiController;
@@ -55,7 +54,7 @@ public class GameFragment extends Fragment {
 
         scoreManager = new ScoreManager(requireContext(), scoreTextView);
         enemyManager = new EnemyManager(requireContext(), screenWidth, screenHeight);
-        samuraiController = new SamuraiController(requireContext(), samuraiAnimation, enemyManager, screenWidth, screenHeight);
+        samuraiController = new SamuraiController(requireContext(), samuraiAnimation, enemyManager, screenWidth, screenHeight,(ViewGroup) rootView);
 
         enemyManager.spawnEnemy();
         outerCircle.post(() -> {

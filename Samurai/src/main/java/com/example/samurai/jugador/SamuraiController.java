@@ -2,6 +2,7 @@ package com.example.samurai.jugador;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +11,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -33,14 +37,16 @@ public class SamuraiController {
     private final GestureDetector gestureDetector;
     private View outerCircle, innerCircle;
     private float centerX, centerY, baseRadius, stickRadius;
+    private final ViewGroup rootView;
 
-    public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight) {
+    public SamuraiController(Context context, ImageView samuraiAnimation, EnemyManager enemyManager, int screenWidth, int screenHeight, ViewGroup rootView) {
         this.context = context;
         this.samuraiAnimation = samuraiAnimation;
         this.enemyManager = enemyManager;
         this.samurai = new Samurai(context, screenWidth, screenHeight);
         this.samuraiAnimation.setX(samurai.getX());
         this.samuraiAnimation.setY(samurai.getY());
+        this.rootView = rootView;
         gestureDetector = new GestureDetector(context, new GestureListener(this));
         new Handler(Looper.getMainLooper());
     }
@@ -199,12 +205,83 @@ public class SamuraiController {
     }
 
     private void handleSpecialAttack() {
+        startFadeToBlack();
+    }
+    private void startFadeToBlack() {
+        if (rootView == null) {
+            throw new IllegalStateException("rootView no puede ser null");
+        }
+
+        // Crear la superposición negra
+        View blackOverlay = new View(context);
+        blackOverlay.setBackgroundColor(Color.BLACK);
+        blackOverlay.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Agregar la superposición negra al rootView, pero detrás del personaje
+        rootView.addView(blackOverlay, 0); // Índice 0 para colocarla detrás de todo
+
+        // Animación de "fade to black"
+        Animation fadeToBlack = new AlphaAnimation(0.0f, 1.0f);
+        fadeToBlack.setDuration(500); // Duración de 500ms
+        fadeToBlack.setFillAfter(true);
+
+        fadeToBlack.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {}
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // Una vez que el fade to black termina, ejecutar la animación de ataque especial
+                performSpecialAttackAnimation(blackOverlay); // Pasar blackOverlay para eliminarlo después
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {}
+        });
+
+        blackOverlay.startAnimation(fadeToBlack);
+    }
+
+    private void performSpecialAttackAnimation(View blackOverlay) {
+        // Ejecutar la animación de ataque especial
+        setSamuraiAnimation(samurai.getAttackAnimation());
+        SoundManager.playSound(R.raw.attack_sound);
+
+        // Lógica para aplicar el daño a los enemigos
         List<Enemy> enemies = enemyManager.getEnemies();
         for (Enemy enemy : enemies) {
             enemy.takeDamage(5, this);
         }
+
+        // Reiniciar el contador de enemigos derrotados
         enemiesDefeated = 0;
         updateSpecialAttackButton();
+
+        // Esperar a que termine la animación de ataque especial antes de eliminar la superposición negra
+        int attackAnimationDuration = getAnimationDuration(samurai.getAttackAnimation());
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            // Eliminar la superposición negra
+            rootView.removeView(blackOverlay);
+
+            restoreNormalAnimation();
+        }, attackAnimationDuration);
+    }
+    private void restoreNormalAnimation() {
+        // Verificar si el personaje está moviéndose o no
+        if (movingLeft || movingRight) {
+            // Si está moviéndose, restaurar la animación de "run"
+            setSamuraiAnimation(samurai.getRunAnimation());
+        } else {
+            // Si no está moviéndose, restaurar la animación de "idle"
+            setSamuraiAnimation(samurai.getIdleAnimation());
+        }
+    }
+    private int getAnimationDuration(AnimationDrawable animation) {
+        int duration = 0;
+        for (int i = 0; i < animation.getNumberOfFrames(); i++) {
+            duration += animation.getDuration(i);
+        }
+        return duration;
     }
 
     public void setSamuraiAnimation(AnimationDrawable animation) {
