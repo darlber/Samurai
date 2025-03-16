@@ -116,15 +116,19 @@ public class GameFragment extends Fragment {
         }
     }
 
-    private void showPauseMenu() {
-        new AlertDialog.Builder(requireContext())
-                .setTitle("Juego en pausa")
-                .setMessage("¿Qué deseas hacer?")
-                .setPositiveButton("Reanudar", (dialog, which) -> togglePause())
-                .setNegativeButton("Menú principal", (dialog, which) -> endGame())
-                .setCancelable(false)
-                .show();
-    }
+private void showPauseMenu() {
+    new AlertDialog.Builder(requireContext())
+            .setTitle("Juego en pausa")
+            .setMessage("¿Qué deseas hacer?")
+            .setPositiveButton("Reanudar", (dialog, which) -> togglePause())
+            .setNegativeButton("Menú principal", (dialog, which) -> {
+                getParentFragmentManager().beginTransaction()
+                        .replace(R.id.frame, new MenuFragment())
+                        .commit();
+            })
+            .setCancelable(false)
+            .show();
+}
 
     public void showGameOverDialog() {
         LayoutInflater inflater = getLayoutInflater();

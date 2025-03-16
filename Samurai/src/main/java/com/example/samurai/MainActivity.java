@@ -12,7 +12,6 @@ import androidx.fragment.app.FragmentTransaction;
 
 public class MainActivity extends FragmentActivity {
     private GameFragment gameFragment;
-
     public MainActivity() {
     }
 
